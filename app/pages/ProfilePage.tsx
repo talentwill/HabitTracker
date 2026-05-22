@@ -103,7 +103,7 @@ export default function ProfilePage() {
       setEmailStatus("error");
       setErrorMsg(
         e instanceof ApiError
-          ? (e as any).code === "EMAIL_IN_USE"
+          ? e.code === "EMAIL_IN_USE"
             ? "该邮箱已被占用"
             : e.code
           : "保存失败"

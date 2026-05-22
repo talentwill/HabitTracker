@@ -74,6 +74,7 @@ export function useHabitDetail(habitId: string | null, refreshKey?: number, onDo
       await load();
       onDone?.();
     } catch {
+      /* handled silently */
     } finally {
       setBusy(false);
     }
@@ -87,6 +88,7 @@ export function useHabitDetail(habitId: string | null, refreshKey?: number, onDo
       await load();
       onDone?.();
     } catch {
+      /* handled silently */
     } finally {
       setBusy(false);
     }
@@ -100,6 +102,7 @@ export function useHabitDetail(habitId: string | null, refreshKey?: number, onDo
       await load();
       onDone?.();
     } catch {
+      /* handled silently */
     } finally {
       setBusy(false);
     }
@@ -113,6 +116,7 @@ export function useHabitDetail(habitId: string | null, refreshKey?: number, onDo
       await load();
       onDone?.();
     } catch {
+      /* handled silently */
     } finally {
       setBusy(false);
     }
@@ -127,6 +131,7 @@ export function useHabitDetail(habitId: string | null, refreshKey?: number, onDo
       onDone?.();
       setConfirmDeleteEvent(null);
     } catch {
+      /* handled silently */
     } finally {
       setBusy(false);
     }

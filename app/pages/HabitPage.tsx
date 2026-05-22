@@ -556,6 +556,7 @@ export default function HabitPage() {
                   await load();
                   setConfirmDeleteEvent(null);
                 } catch {
+                  /* handled silently */
                 } finally {
                   setBusy(false);
                 }
@@ -605,6 +606,7 @@ export default function HabitPage() {
                   await load();
                   setConfirmManualDone(null);
                 } catch {
+                  /* handled silently */
                 } finally {
                   setBusy(false);
                 }

@@ -51,7 +51,9 @@ export default function StatsPage() {
         try {
           const eRes = await api.habitEvents(h.id);
           events = eRes.events;
-        } catch {}
+        } catch {
+          /* non-critical */
+        }
 
         const doneEvents = events
           .filter((e) => e.action === "done")

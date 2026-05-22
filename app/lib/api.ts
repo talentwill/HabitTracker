@@ -51,8 +51,6 @@ export type StatsSummary = {
   >;
 };
 
-type ApiErrorPayload = { error?: string; details?: unknown };
-
 export class ApiError extends Error {
   status: number;
   code: string;
@@ -466,7 +464,7 @@ async function applyAction(
   habitId: string,
   action: "done" | "push" | "skip"
 ): Promise<{ habit: Habit }> {
-  const { data, error } = await supabase.rpc("apply_habit_action", {
+  const { error } = await supabase.rpc("apply_habit_action", {
     p_habit_id: habitId,
     p_action: action,
   });
@@ -595,13 +593,13 @@ export async function habitDeleteEvent(
 
   // Recalculate next_due_date for done/push actions
   if (event.action === "done" || event.action === "push") {
-    await recalculateNextDueDate(habitId, authUser.id);
+    await recalculateNextDueDate(habitId);
   }
 
   return getHabit(habitId);
 }
 
-async function recalculateNextDueDate(habitId: string, userId: string): Promise<void> {
+async function recalculateNextDueDate(habitId: string): Promise<void> {
   const { data: habit } = await supabase
     .from("habits")
     .select("interval_days, start_date")

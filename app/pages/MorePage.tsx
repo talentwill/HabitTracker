@@ -60,8 +60,9 @@ export default function MorePage() {
           `导入成功！共导入 ${result.imported.habits} 个习惯，${result.imported.events} 条记录`
         );
         window.location.reload();
-      } catch (err: any) {
-        alert(`导入失败：${err?.message || "格式错误"}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "格式错误";
+        alert(`导入失败：${message}`);
       } finally {
         setImporting(false);
       }
