@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
-import { useAuth } from '../auth/AuthContext'
+import { useAuth } from "../auth/AuthContext";
 import {
   ApiError,
   updateName,
@@ -8,137 +8,133 @@ import {
   updatePassword,
   getApiKey,
   generateApiKey,
-} from '../lib/api'
+} from "../lib/api";
 
 export default function ProfilePage() {
-  const { user, logout, refresh } = useAuth()
+  const { user, logout, refresh } = useAuth();
 
-  const [name, setName] = useState(user?.name ?? '')
-  const [email, setEmail] = useState(user?.email ?? '')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [name, setName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [nameStatus, setNameStatus] = useState<
-    'idle' | 'saving' | 'done' | 'error'
-  >('idle')
-  const [emailStatus, setEmailStatus] = useState<
-    'idle' | 'saving' | 'done' | 'error'
-  >('idle')
-  const [passwordStatus, setPasswordStatus] = useState<
-    'idle' | 'saving' | 'done' | 'error'
-  >('idle')
-  const [errorMsg, setErrorMsg] = useState('')
+  const [nameStatus, setNameStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
+  const [emailStatus, setEmailStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
+  const [passwordStatus, setPasswordStatus] = useState<"idle" | "saving" | "done" | "error">(
+    "idle"
+  );
+  const [errorMsg, setErrorMsg] = useState("");
   const [apiKeyInfo, setApiKeyInfo] = useState<{
-    hasKey: boolean
-    apiKey: string | null
-    createdAt: string | null
-  } | null>(null)
-  const [apiKeyLoading, setApiKeyLoading] = useState(false)
-  const [newKey, setNewKey] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+    hasKey: boolean;
+    apiKey: string | null;
+    createdAt: string | null;
+  } | null>(null);
+  const [apiKeyLoading, setApiKeyLoading] = useState(false);
+  const [newKey, setNewKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   function clearError() {
-    setErrorMsg('')
+    setErrorMsg("");
   }
 
   async function loadApiKey() {
     try {
-      const info = await getApiKey()
-      setApiKeyInfo(info)
+      const info = await getApiKey();
+      setApiKeyInfo(info);
     } catch {
       /* ignore */
     }
   }
 
   async function handleGenerateApiKey() {
-    setApiKeyLoading(true)
-    clearError()
+    setApiKeyLoading(true);
+    clearError();
     try {
-      const result = await generateApiKey()
-      setNewKey(result.apiKey)
-      setApiKeyInfo({ hasKey: true, apiKey: null, createdAt: result.createdAt })
-      setShowConfirm(false)
+      const result = await generateApiKey();
+      setNewKey(result.apiKey);
+      setApiKeyInfo({ hasKey: true, apiKey: null, createdAt: result.createdAt });
+      setShowConfirm(false);
     } catch (e) {
-      setErrorMsg(e instanceof ApiError ? e.code : '生成失败')
+      setErrorMsg(e instanceof ApiError ? e.code : "生成失败");
     } finally {
-      setApiKeyLoading(false)
+      setApiKeyLoading(false);
     }
   }
 
   function handleCopy() {
     if (newKey) {
-      navigator.clipboard.writeText(newKey)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      navigator.clipboard.writeText(newKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   }
 
   async function handleSaveName() {
-    clearError()
+    clearError();
     if (name.length > 50) {
-      setErrorMsg('用户名不能超过 50 个字符')
-      return
+      setErrorMsg("用户名不能超过 50 个字符");
+      return;
     }
-    setNameStatus('saving')
+    setNameStatus("saving");
     try {
-      await updateName(name)
-      await refresh()
-      setNameStatus('done')
-      setTimeout(() => setNameStatus('idle'), 2000)
+      await updateName(name);
+      await refresh();
+      setNameStatus("done");
+      setTimeout(() => setNameStatus("idle"), 2000);
     } catch (e) {
-      setNameStatus('error')
-      setErrorMsg(e instanceof ApiError ? e.code : '保存失败')
+      setNameStatus("error");
+      setErrorMsg(e instanceof ApiError ? e.code : "保存失败");
     }
   }
 
   async function handleSaveEmail() {
-    clearError()
-    if (!email.includes('@')) {
-      setErrorMsg('请输入有效的邮箱地址')
-      return
+    clearError();
+    if (!email.includes("@")) {
+      setErrorMsg("请输入有效的邮箱地址");
+      return;
     }
-    setEmailStatus('saving')
+    setEmailStatus("saving");
     try {
-      await updateEmail(email)
-      setEmailStatus('done')
-      setTimeout(() => void logout(), 1000)
+      await updateEmail(email);
+      setEmailStatus("done");
+      setTimeout(() => void logout(), 1000);
     } catch (e) {
-      setEmailStatus('error')
+      setEmailStatus("error");
       setErrorMsg(
         e instanceof ApiError
-          ? (e as any).code === 'EMAIL_IN_USE'
-            ? '该邮箱已被占用'
+          ? (e as any).code === "EMAIL_IN_USE"
+            ? "该邮箱已被占用"
             : e.code
-          : '保存失败'
-      )
+          : "保存失败"
+      );
     }
   }
 
   async function handleSavePassword() {
-    clearError()
+    clearError();
     if (password.length < 6) {
-      setErrorMsg('密码至少 6 位')
-      return
+      setErrorMsg("密码至少 6 位");
+      return;
     }
     if (password !== confirmPassword) {
-      setErrorMsg('两次密码输入不一致')
-      return
+      setErrorMsg("两次密码输入不一致");
+      return;
     }
-    setPasswordStatus('saving')
+    setPasswordStatus("saving");
     try {
-      await updatePassword(password)
-      setPasswordStatus('done')
-      setTimeout(() => void logout(), 1000)
+      await updatePassword(password);
+      setPasswordStatus("done");
+      setTimeout(() => void logout(), 1000);
     } catch (e) {
-      setPasswordStatus('error')
-      setErrorMsg(e instanceof ApiError ? e.code : '保存失败')
+      setPasswordStatus("error");
+      setErrorMsg(e instanceof ApiError ? e.code : "保存失败");
     }
   }
 
   useEffect(() => {
-    void loadApiKey()
-  }, [])
+    void loadApiKey();
+  }, []);
 
   return (
     <div className="pb-20 max-w-lg mx-auto">
@@ -156,23 +152,19 @@ export default function ProfilePage() {
           <div className="label">用户名</div>
           <button
             type="button"
-            disabled={nameStatus === 'saving'}
+            disabled={nameStatus === "saving"}
             onClick={() => void handleSaveName()}
             className="btn btn-primary text-[12px] px-3.5 py-1.5"
           >
-            {nameStatus === 'saving'
-              ? '保存中…'
-              : nameStatus === 'done'
-                ? '已保存 ✓'
-                : '保存'}
+            {nameStatus === "saving" ? "保存中…" : nameStatus === "done" ? "已保存 ✓" : "保存"}
           </button>
         </div>
         <input
           type="text"
           value={name}
           onChange={(e) => {
-            setName(e.target.value)
-            clearError()
+            setName(e.target.value);
+            clearError();
           }}
           placeholder="输入用户名"
           className="input"
@@ -185,11 +177,11 @@ export default function ProfilePage() {
           <div className="label">邮箱</div>
           <button
             type="button"
-            disabled={emailStatus === 'saving'}
+            disabled={emailStatus === "saving"}
             onClick={() => void handleSaveEmail()}
             className="btn btn-primary text-[12px] px-3.5 py-1.5"
           >
-            {emailStatus === 'saving' ? '保存中…' : '保存'}
+            {emailStatus === "saving" ? "保存中…" : "保存"}
           </button>
         </div>
         <div className="text-[12px] text-muted mb-3">修改后需要重新登录</div>
@@ -197,8 +189,8 @@ export default function ProfilePage() {
           type="email"
           value={email}
           onChange={(e) => {
-            setEmail(e.target.value)
-            clearError()
+            setEmail(e.target.value);
+            clearError();
           }}
           className="input"
         />
@@ -210,11 +202,11 @@ export default function ProfilePage() {
           <div className="label">密码</div>
           <button
             type="button"
-            disabled={passwordStatus === 'saving'}
+            disabled={passwordStatus === "saving"}
             onClick={() => void handleSavePassword()}
             className="btn btn-primary text-[12px] px-3.5 py-1.5"
           >
-            {passwordStatus === 'saving' ? '保存中…' : '保存'}
+            {passwordStatus === "saving" ? "保存中…" : "保存"}
           </button>
         </div>
         <div className="text-[12px] text-muted mb-3">修改后需要重新登录</div>
@@ -223,8 +215,8 @@ export default function ProfilePage() {
             type="password"
             value={password}
             onChange={(e) => {
-              setPassword(e.target.value)
-              clearError()
+              setPassword(e.target.value);
+              clearError();
             }}
             placeholder="新密码（至少 6 位）"
             className="input"
@@ -233,8 +225,8 @@ export default function ProfilePage() {
             type="password"
             value={confirmPassword}
             onChange={(e) => {
-              setConfirmPassword(e.target.value)
-              clearError()
+              setConfirmPassword(e.target.value);
+              clearError();
             }}
             placeholder="确认新密码"
             className="input"
@@ -253,18 +245,16 @@ export default function ProfilePage() {
               onClick={() => setShowConfirm(true)}
               className="btn text-[12px] px-3.5 py-1.5"
             >
-              {apiKeyInfo?.hasKey ? '重新生成' : '生成'}
+              {apiKeyInfo?.hasKey ? "重新生成" : "生成"}
             </button>
           )}
         </div>
-        <div className="text-[12px] text-muted mb-3">
-          用于 iOS 快捷指令等外部工具打卡
-        </div>
+        <div className="text-[12px] text-muted mb-3">用于 iOS 快捷指令等外部工具打卡</div>
 
         {apiKeyInfo?.hasKey ? (
           <div className="mb-3 rounded-lg bg-warm-white px-3.5 py-2.5">
             <div className="text-[13px] text-ink font-mono">
-              {apiKeyInfo.apiKey ?? '••••••••••••'}
+              {apiKeyInfo.apiKey ?? "••••••••••••"}
             </div>
             {apiKeyInfo.createdAt && (
               <div className="text-[11px] text-muted mt-1">
@@ -279,7 +269,7 @@ export default function ProfilePage() {
         {showConfirm && (
           <div className="flex items-center gap-2">
             <span className="text-[12px] text-red-500">
-              {apiKeyInfo?.hasKey ? '重新生成会使旧 Key 失效，' : ''}确认生成？
+              {apiKeyInfo?.hasKey ? "重新生成会使旧 Key 失效，" : ""}确认生成？
             </span>
             <button
               type="button"
@@ -305,15 +295,13 @@ export default function ProfilePage() {
               请立即复制，关闭后无法再查看完整 Key
             </div>
             <div className="flex items-center gap-2">
-              <code className="text-[12px] text-ink break-all flex-1">
-                {newKey}
-              </code>
+              <code className="text-[12px] text-ink break-all flex-1">{newKey}</code>
               <button
                 type="button"
                 className="btn text-[11px] px-2.5 py-1 shrink-0"
                 onClick={handleCopy}
               >
-                {copied ? '已复制 ✓' : '复制'}
+                {copied ? "已复制 ✓" : "复制"}
               </button>
             </div>
           </div>
@@ -337,5 +325,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

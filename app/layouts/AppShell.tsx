@@ -1,7 +1,7 @@
-import { Outlet } from 'react-router'
-import Sidebar from '../components/desktop/Sidebar'
-import MobileTabBar from '../components/mobile/MobileTabBar'
-import { TodayFilterProvider } from '../contexts/TodayFilterContext'
+import { Outlet } from "react-router";
+import Sidebar from "../components/desktop/Sidebar";
+import MobileTabBar from "../components/mobile/MobileTabBar";
+import { TodayFilterProvider } from "../contexts/TodayFilterContext";
 
 export default function AppShell() {
   return (
@@ -14,5 +14,5 @@ export default function AppShell() {
         <MobileTabBar />
       </div>
     </TodayFilterProvider>
-  )
+  );
 }

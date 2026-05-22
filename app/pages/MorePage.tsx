@@ -1,75 +1,73 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router'
-import { useAuth } from '../auth/AuthContext'
-import TagManager from '../components/TagManager'
-import * as api from '../lib/api'
+import { useState, useEffect } from "react";
+import { Link } from "react-router";
+import { useAuth } from "../auth/AuthContext";
+import TagManager from "../components/TagManager";
+import * as api from "../lib/api";
 
 export default function MorePage() {
-  const { user, logout } = useAuth()
-  const [tags, setTags] = useState<
-    { id: string; name: string; habit_count: number }[]
-  >([])
-  const [managerOpen, setManagerOpen] = useState(false)
-  const [importing, setImporting] = useState(false)
+  const { user, logout } = useAuth();
+  const [tags, setTags] = useState<{ id: string; name: string; habit_count: number }[]>([]);
+  const [managerOpen, setManagerOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     api
       .listTags()
       .then((res) => setTags(res.tags))
-      .catch(() => {})
-  }, [])
+      .catch(() => {});
+  }, []);
 
   const refreshTags = () => {
     api
       .listTags()
       .then((res) => setTags(res.tags))
-      .catch(() => {})
-  }
+      .catch(() => {});
+  };
 
   const handleExport = async () => {
     try {
-      const blob = await api.exportHabits()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      const date = new Date().toISOString().slice(0, 10)
-      a.href = url
-      a.download = `habits-backup-${date}.json`
-      a.click()
-      URL.revokeObjectURL(url)
+      const blob = await api.exportHabits();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `habits-backup-${date}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
     } catch {
-      alert('导出失败')
+      alert("导出失败");
     }
-  }
+  };
 
   const handleImport = () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.json'
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
     input.onchange = async () => {
-      const file = input.files?.[0]
-      if (!file) return
+      const file = input.files?.[0];
+      if (!file) return;
 
-      if (!confirm('此操作将替换所有现有习惯和打卡记录，确定继续？')) {
-        return
+      if (!confirm("此操作将替换所有现有习惯和打卡记录，确定继续？")) {
+        return;
       }
 
-      setImporting(true)
+      setImporting(true);
       try {
-        const text = await file.text()
-        const data = JSON.parse(text)
-        const result = await api.importHabits(data)
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const result = await api.importHabits(data);
         alert(
           `导入成功！共导入 ${result.imported.habits} 个习惯，${result.imported.events} 条记录`
-        )
-        window.location.reload()
+        );
+        window.location.reload();
       } catch (err: any) {
-        alert(`导入失败：${err?.message || '格式错误'}`)
+        alert(`导入失败：${err?.message || "格式错误"}`);
       } finally {
-        setImporting(false)
+        setImporting(false);
       }
-    }
-    input.click()
-  }
+    };
+    input.click();
+  };
 
   return (
     <div className="pb-20">
@@ -79,12 +77,10 @@ export default function MorePage() {
       <Link to="/profile" className="paper px-4 py-3 mb-3 block">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-warm-white text-[14px] font-bold text-muted">
-            {(user?.name || user?.email || 'U')[0]?.toUpperCase()}
+            {(user?.name || user?.email || "U")[0]?.toUpperCase()}
           </div>
           <div>
-            <div className="text-[16px] font-semibold text-ink">
-              {user?.name || user?.email}
-            </div>
+            <div className="text-[16px] font-semibold text-ink">{user?.name || user?.email}</div>
           </div>
         </div>
       </Link>
@@ -120,9 +116,7 @@ export default function MorePage() {
           <span>🏷 管理标签</span>
           <span className="flex items-center gap-1">
             {tags.length > 0 && (
-              <span className="text-muted-light text-[16px] sm:text-[12px]">
-                {tags.length}个
-              </span>
+              <span className="text-muted-light text-[16px] sm:text-[12px]">{tags.length}个</span>
             )}
             <span className="text-muted-light">›</span>
           </span>
@@ -145,7 +139,7 @@ export default function MorePage() {
           onClick={handleImport}
           disabled={importing}
         >
-          <span>{importing ? '导入中...' : '📥 导入习惯数据'}</span>
+          <span>{importing ? "导入中..." : "📥 导入习惯数据"}</span>
           <span className="text-muted-light">›</span>
         </button>
       </div>
@@ -155,7 +149,7 @@ export default function MorePage() {
         <button
           type="button"
           className="w-full flex items-center justify-between px-4 py-3 text-[16px] font-medium"
-          style={{ color: '#e91e63' }}
+          style={{ color: "#e91e63" }}
           onClick={() => void logout()}
         >
           退出登录
@@ -170,5 +164,5 @@ export default function MorePage() {
         onRefresh={refreshTags}
       />
     </div>
-  )
+  );
 }

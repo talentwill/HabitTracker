@@ -1,26 +1,26 @@
-import { useEffect, useRef, useState } from 'react'
-import { EMOJI_CATEGORIES } from '../lib/emojiData'
+import { useEffect, useRef, useState } from "react";
+import { EMOJI_CATEGORIES } from "../lib/emojiData";
 
 export default function EmojiPicker(props: {
-  value: string | null
-  onSelect: (emoji: string) => void
-  onClear: () => void
-  onClose: () => void
+  value: string | null;
+  onSelect: (emoji: string) => void;
+  onClear: () => void;
+  onClose: () => void;
 }) {
-  const [activeCategory, setActiveCategory] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
+  const [activeCategory, setActiveCategory] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        props.onClose()
+        props.onClose();
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [props.onClose])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [props.onClose]);
 
-  const category = EMOJI_CATEGORIES[activeCategory]!
+  const category = EMOJI_CATEGORIES[activeCategory]!;
 
   return (
     <div
@@ -35,8 +35,8 @@ export default function EmojiPicker(props: {
             type="button"
             className={`px-2 py-0.5 rounded-full text-[12px] whitespace-nowrap transition ${
               i === activeCategory
-                ? 'bg-[#1c1c1c] text-[#fcfbf8]'
-                : 'text-[#5f5f5d] hover:bg-[rgba(28,28,28,0.04)]'
+                ? "bg-[#1c1c1c] text-[#fcfbf8]"
+                : "text-[#5f5f5d] hover:bg-[rgba(28,28,28,0.04)]"
             }`}
             onClick={() => setActiveCategory(i)}
           >
@@ -52,13 +52,11 @@ export default function EmojiPicker(props: {
             key={emoji}
             type="button"
             className={`w-8 h-8 flex items-center justify-center rounded-md text-[18px] transition ${
-              props.value === emoji
-                ? 'bg-[#ede7f6]'
-                : 'hover:bg-[rgba(28,28,28,0.04)]'
+              props.value === emoji ? "bg-[#ede7f6]" : "hover:bg-[rgba(28,28,28,0.04)]"
             }`}
             onClick={() => {
-              props.onSelect(emoji)
-              props.onClose()
+              props.onSelect(emoji);
+              props.onClose();
             }}
           >
             {emoji}
@@ -73,8 +71,8 @@ export default function EmojiPicker(props: {
             type="button"
             className="text-[11px] text-[#7e57c2] hover:underline"
             onClick={() => {
-              props.onClear()
-              props.onClose()
+              props.onClear();
+              props.onClose();
             }}
           >
             清除图标
@@ -82,5 +80,5 @@ export default function EmojiPicker(props: {
         </div>
       )}
     </div>
-  )
+  );
 }

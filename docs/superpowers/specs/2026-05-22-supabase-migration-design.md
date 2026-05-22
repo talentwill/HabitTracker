@@ -19,23 +19,24 @@
 
 ## 技术选型
 
-| 组件 | 方案 |
-|------|------|
-| 前端框架 | React 19 + TypeScript + Vite |
-| UI 样式 | Tailwind CSS |
-| 前端部署 | Cloudflare Pages |
-| 数据库 | Supabase PostgreSQL |
-| 认证 | Supabase Auth（邮箱密码） |
-| 业务逻辑 | PostgreSQL Functions（RPC）+ 前端直连 |
-| API Key 外部调用 | Supabase Edge Function |
-| 数据库安全 | Row Level Security（RLS） |
-| 前端数据库访问 | @supabase/supabase-js |
+| 组件             | 方案                                  |
+| ---------------- | ------------------------------------- |
+| 前端框架         | React 19 + TypeScript + Vite          |
+| UI 样式          | Tailwind CSS                          |
+| 前端部署         | Cloudflare Pages                      |
+| 数据库           | Supabase PostgreSQL                   |
+| 认证             | Supabase Auth（邮箱密码）             |
+| 业务逻辑         | PostgreSQL Functions（RPC）+ 前端直连 |
+| API Key 外部调用 | Supabase Edge Function                |
+| 数据库安全       | Row Level Security（RLS）             |
+| 前端数据库访问   | @supabase/supabase-js                 |
 
 ## 数据库设计
 
 ### 表结构
 
 **profiles（应用用户表，关联 Supabase auth.users）**
+
 ```sql
 profiles (
   id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -48,6 +49,7 @@ profiles (
 ```
 
 **tags**
+
 ```sql
 tags (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -58,6 +60,7 @@ tags (
 ```
 
 **habits**
+
 ```sql
 habits (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -76,6 +79,7 @@ habits (
 ```
 
 **habit_events**
+
 ```sql
 habit_events (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -260,20 +264,20 @@ web/
 ### Supabase 客户端
 
 ```typescript
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ```
 
 ### 数据操作方式
 
-| 操作 | 方式 |
-|------|------|
-| CRUD habits/tags | `supabase.from('habits').select()...` 直连 |
-| 打卡/跳过/推送 | `supabase.rpc('apply_habit_action', {...})` |
-| 统计 | `supabase.rpc('get_stats_summary')` |
-| 登录/注册 | `supabase.auth.signInWithPassword()` / `signUp()` |
-| API Key 外部调用 | Edge Function |
+| 操作             | 方式                                              |
+| ---------------- | ------------------------------------------------- |
+| CRUD habits/tags | `supabase.from('habits').select()...` 直连        |
+| 打卡/跳过/推送   | `supabase.rpc('apply_habit_action', {...})`       |
+| 统计             | `supabase.rpc('get_stats_summary')`               |
+| 登录/注册        | `supabase.auth.signInWithPassword()` / `signUp()` |
+| API Key 外部调用 | Edge Function                                     |
 
 ### 认证流程
 
@@ -300,6 +304,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 **时机：** 开发完成、测试通过后，从服务器已有的 JSON 导出文件导入。
 
 **步骤：**
+
 1. 在 Supabase 中创建用户（通过 Auth API，使用相同邮箱密码）
 2. 读取 JSON 文件，按用户映射新的 user_id
 3. 导入 tags → habits → habit_events（按依赖顺序）

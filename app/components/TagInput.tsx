@@ -1,48 +1,43 @@
-import { useRef, useState } from 'react'
+import { useRef, useState } from "react";
 
 const TAG_COLORS = [
-  { bg: '#ede7f6', text: '#5e35b1' },
-  { bg: '#e3f2fd', text: '#1565c0' },
-  { bg: '#e8f5e9', text: '#2e7d32' },
-  { bg: '#fff3e0', text: '#e65100' },
-  { bg: '#fce4ec', text: '#c2185b' },
-  { bg: '#e0f7fa', text: '#00838f' },
-  { bg: '#fff8e1', text: '#f9a825' },
-  { bg: '#f3e5f5', text: '#7b1fa2' },
-]
+  { bg: "#ede7f6", text: "#5e35b1" },
+  { bg: "#e3f2fd", text: "#1565c0" },
+  { bg: "#e8f5e9", text: "#2e7d32" },
+  { bg: "#fff3e0", text: "#e65100" },
+  { bg: "#fce4ec", text: "#c2185b" },
+  { bg: "#e0f7fa", text: "#00838f" },
+  { bg: "#fff8e1", text: "#f9a825" },
+  { bg: "#f3e5f5", text: "#7b1fa2" },
+];
 
 function tagColor(tag: string): React.CSSProperties {
-  let hash = 0
-  for (let i = 0; i < tag.length; i++)
-    hash = tag.charCodeAt(i) + ((hash << 5) - hash)
-  const c = TAG_COLORS[Math.abs(hash) % TAG_COLORS.length]
-  return { backgroundColor: c.bg, color: c.text }
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+  const c = TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+  return { backgroundColor: c.bg, color: c.text };
 }
 
-export { tagColor }
+export { tagColor };
 
 export default function TagInput(props: {
-  value: string
-  onChange: (v: string) => void
-  suggestions: string[]
+  value: string;
+  onChange: (v: string) => void;
+  suggestions: string[];
 }) {
-  const [focused, setFocused] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const query = props.value.trim().toLowerCase()
+  const query = props.value.trim().toLowerCase();
   const filtered = query
-    ? props.suggestions.filter(
-        (t) => t.toLowerCase().includes(query) && t !== props.value
-      )
-    : props.suggestions.filter((t) => t !== props.value)
+    ? props.suggestions.filter((t) => t.toLowerCase().includes(query) && t !== props.value)
+    : props.suggestions.filter((t) => t !== props.value);
 
   // 如果 query 不为空且没有完全匹配的已有标签，则允许"创建新标签"选项
-  const exactMatch = props.suggestions.some(
-    (t) => t.toLowerCase() === query && t !== props.value
-  )
-  const canCreate = query.length > 0 && !exactMatch
+  const exactMatch = props.suggestions.some((t) => t.toLowerCase() === query && t !== props.value);
+  const canCreate = query.length > 0 && !exactMatch;
 
-  const showDropdown = focused && (filtered.length > 0 || canCreate)
+  const showDropdown = focused && (filtered.length > 0 || canCreate);
 
   return (
     <div className="relative">
@@ -61,7 +56,7 @@ export default function TagInput(props: {
           <button
             type="button"
             className="mt-1 text-[11px] text-muted-light hover:text-ink"
-            onClick={() => props.onChange('')}
+            onClick={() => props.onChange("")}
           >
             清除
           </button>
@@ -75,8 +70,8 @@ export default function TagInput(props: {
               type="button"
               className="w-full px-3 py-1.5 text-left text-[14px] sm:text-[12px] hover:bg-warm-white flex items-center gap-1.5"
               onMouseDown={() => {
-                props.onChange(t)
-                inputRef.current?.blur()
+                props.onChange(t);
+                inputRef.current?.blur();
               }}
             >
               <span
@@ -93,8 +88,8 @@ export default function TagInput(props: {
               type="button"
               className="w-full px-3 py-1.5 text-left text-[14px] sm:text-[12px] hover:bg-warm-white text-accent flex items-center gap-1.5 border-t border-line"
               onMouseDown={() => {
-                props.onChange(query)
-                inputRef.current?.blur()
+                props.onChange(query);
+                inputRef.current?.blur();
               }}
             >
               <span className="text-[12px] sm:text-[10px]">+</span>
@@ -104,5 +99,5 @@ export default function TagInput(props: {
         </div>
       ) : null}
     </div>
-  )
+  );
 }

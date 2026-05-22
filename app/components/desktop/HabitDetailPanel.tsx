@@ -1,40 +1,40 @@
-import Heatmap from '../Heatmap'
-import Modal from '../Modal'
-import MonthCalendar from '../MonthCalendar'
-import HabitStatsGrid from '../HabitStatsGrid'
-import HabitEventList from '../HabitEventList'
-import { useHabitDetail } from '../../hooks/useHabitDetail'
-import type { Habit } from '../../lib/api'
-import { diffDays, statusForDue } from '../../lib/date'
-import { getFirstTextChar } from '../../lib/utils'
+import Heatmap from "../Heatmap";
+import Modal from "../Modal";
+import MonthCalendar from "../MonthCalendar";
+import HabitStatsGrid from "../HabitStatsGrid";
+import HabitEventList from "../HabitEventList";
+import { useHabitDetail } from "../../hooks/useHabitDetail";
+import type { Habit } from "../../lib/api";
+import { diffDays, statusForDue } from "../../lib/date";
+import { getFirstTextChar } from "../../lib/utils";
 
 export default function HabitDetailPanel(props: {
-  habitId: string | null
-  onDone: () => void
-  onEdit: (habit: Habit) => void
-  refreshKey?: number
+  habitId: string | null;
+  onDone: () => void;
+  onEdit: (habit: Habit) => void;
+  refreshKey?: number;
 }) {
-  const d = useHabitDetail(props.habitId, props.refreshKey, props.onDone)
+  const d = useHabitDetail(props.habitId, props.refreshKey, props.onDone);
 
   if (!props.habitId) {
     return (
       <div className="flex-1 flex items-center justify-center text-[14px] text-gray-400">
         请选择一个习惯查看详情
       </div>
-    )
+    );
   }
 
   if (d.loading) {
-    return <div className="flex-1 p-6 text-[14px] text-gray-400">加载中...</div>
+    return <div className="flex-1 p-6 text-[14px] text-gray-400">加载中...</div>;
   }
 
   if (!d.habit) {
-    return <div className="flex-1 p-6 text-[14px] text-gray-400">未找到</div>
+    return <div className="flex-1 p-6 text-[14px] text-gray-400">未找到</div>;
   }
 
-  const doneToday = !!d.todayDoneEvent
-  const status = statusForDue(d.habit.nextDueDate, d.today)
-  const canAct = !d.habit.archived
+  const doneToday = !!d.todayDoneEvent;
+  const status = statusForDue(d.habit.nextDueDate, d.today);
+  const canAct = !d.habit.archived;
 
   return (
     <>
@@ -48,13 +48,9 @@ export default function HabitDetailPanel(props: {
                   {d.habit.icon || getFirstTextChar(d.habit.title)}
                 </span>
                 <div>
-                  <h2 className="text-[16px] font-bold text-ink">
-                    {d.habit.title}
-                  </h2>
+                  <h2 className="text-[16px] font-bold text-ink">{d.habit.title}</h2>
                   {d.habit.note ? (
-                    <div className="text-[12px] text-gray-400 mt-0.5">
-                      {d.habit.note}
-                    </div>
+                    <div className="text-[12px] text-gray-400 mt-0.5">{d.habit.note}</div>
                   ) : null}
                 </div>
               </div>
@@ -84,8 +80,8 @@ export default function HabitDetailPanel(props: {
                       type="button"
                       className={
                         doneToday
-                          ? 'btn text-[12px] px-2 sm:px-3 py-1 border border-[#ef5350] text-[#ef5350] hover:bg-[#fce4ec]'
-                          : 'btn btn-primary text-[12px] px-2 sm:px-3 py-1'
+                          ? "btn text-[12px] px-2 sm:px-3 py-1 border border-[#ef5350] text-[#ef5350] hover:bg-[#fce4ec]"
+                          : "btn btn-primary text-[12px] px-2 sm:px-3 py-1"
                       }
                       onClick={d.handleDone}
                       disabled={d.busy}
@@ -102,29 +98,28 @@ export default function HabitDetailPanel(props: {
                         </>
                       )}
                     </button>
-                    {!doneToday &&
-                      (status === 'overdue' || status === 'today') && (
-                        <>
-                          <button
-                            type="button"
-                            className="btn text-[12px] px-2 sm:px-3 py-1"
-                            onClick={d.handlePush}
-                            disabled={d.busy}
-                          >
-                            <span>⏰</span>
-                            <span className="hidden sm:inline">明天</span>
-                          </button>
-                          <button
-                            type="button"
-                            className="btn text-[12px] px-2 sm:px-3 py-1"
-                            onClick={d.handleSkip}
-                            disabled={d.busy}
-                          >
-                            <span>⏭</span>
-                            <span className="hidden sm:inline">跳过</span>
-                          </button>
-                        </>
-                      )}
+                    {!doneToday && (status === "overdue" || status === "today") && (
+                      <>
+                        <button
+                          type="button"
+                          className="btn text-[12px] px-2 sm:px-3 py-1"
+                          onClick={d.handlePush}
+                          disabled={d.busy}
+                        >
+                          <span>⏰</span>
+                          <span className="hidden sm:inline">明天</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="btn text-[12px] px-2 sm:px-3 py-1"
+                          onClick={d.handleSkip}
+                          disabled={d.busy}
+                        >
+                          <span>⏭</span>
+                          <span className="hidden sm:inline">跳过</span>
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -139,28 +134,28 @@ export default function HabitDetailPanel(props: {
                 </span>
               </div>
               {(() => {
-                const daysUntil = diffDays(d.today, d.habit.nextDueDate)
-                const isOverdue = daysUntil < 0
-                const isToday = daysUntil === 0
+                const daysUntil = diffDays(d.today, d.habit.nextDueDate);
+                const isOverdue = daysUntil < 0;
+                const isToday = daysUntil === 0;
                 const suffix = isOverdue
                   ? `（逾期${Math.abs(daysUntil)}天）`
                   : isToday
-                    ? '（今天）'
+                    ? "（今天）"
                     : daysUntil === 1
-                      ? '（明天）'
-                      : `（还剩${daysUntil}天）`
+                      ? "（明天）"
+                      : `（还剩${daysUntil}天）`;
                 const colorClass = isOverdue
-                  ? 'bg-[#fce4ec] text-[#c62828]'
+                  ? "bg-[#fce4ec] text-[#c62828]"
                   : isToday
-                    ? 'bg-[#fff3e0] text-[#e65100]'
-                    : 'bg-[#e3f2fd] text-[#1565c0]'
+                    ? "bg-[#fff3e0] text-[#e65100]"
+                    : "bg-[#e3f2fd] text-[#1565c0]";
                 return (
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${colorClass}`}
                   >
                     📅 {d.habit.nextDueDate} {suffix}
                   </span>
-                )
+                );
               })()}
             </div>
 
@@ -172,8 +167,8 @@ export default function HabitDetailPanel(props: {
                 events={d.events}
                 nextDueDate={d.habit.nextDueDate}
                 onMonthClick={(y, m) => {
-                  d.setCalYear(y)
-                  d.setCalMonth(m)
+                  d.setCalYear(y);
+                  d.setCalMonth(m);
                 }}
               />
             </div>
@@ -190,14 +185,11 @@ export default function HabitDetailPanel(props: {
                 onPrev={() => d.navigateMonth(-1)}
                 onNext={() => d.navigateMonth(1)}
                 onDateClick={async (date, event) => {
-                  if (!d.habit) return
-                  if (
-                    event &&
-                    (event.action === 'done' || event.action === 'push')
-                  ) {
-                    d.setConfirmDeleteEvent(event)
+                  if (!d.habit) return;
+                  if (event && (event.action === "done" || event.action === "push")) {
+                    d.setConfirmDeleteEvent(event);
                   } else {
-                    await d.handleManualDone(date)
+                    await d.handleManualDone(date);
                   }
                 }}
               />
@@ -205,9 +197,7 @@ export default function HabitDetailPanel(props: {
 
             {/* Habit Log */}
             <div className="paper px-4 py-3">
-              <div className="text-[13px] font-semibold text-ink mb-2">
-                打卡记录
-              </div>
+              <div className="text-[13px] font-semibold text-ink mb-2">打卡记录</div>
               <HabitEventList
                 events={d.currentMonthEvents}
                 calYear={d.calYear}
@@ -238,8 +228,7 @@ export default function HabitDetailPanel(props: {
               type="button"
               className="btn bg-[#ef5350] text-white hover:bg-[#d32f2f] text-[13px] px-4 py-1.5 border-none"
               onClick={() => {
-                if (d.confirmDeleteEvent)
-                  d.handleDeleteEvent(d.confirmDeleteEvent)
+                if (d.confirmDeleteEvent) d.handleDeleteEvent(d.confirmDeleteEvent);
               }}
               disabled={d.busy}
             >
@@ -251,15 +240,15 @@ export default function HabitDetailPanel(props: {
         <div className="py-2 text-[14px] text-gray-600">
           确定要删除 {d.confirmDeleteEvent?.actionDate} 的
           <span className="font-bold text-ink mx-1">
-            {d.confirmDeleteEvent?.action === 'done'
-              ? '打卡'
-              : d.confirmDeleteEvent?.action === 'push'
-                ? '明天'
-                : '跳过'}
+            {d.confirmDeleteEvent?.action === "done"
+              ? "打卡"
+              : d.confirmDeleteEvent?.action === "push"
+                ? "明天"
+                : "跳过"}
           </span>
           记录吗？该操作无法恢复。
         </div>
       </Modal>
     </>
-  )
+  );
 }

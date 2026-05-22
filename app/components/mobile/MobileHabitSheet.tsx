@@ -1,33 +1,33 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from "react";
 
-import Heatmap from '../Heatmap'
-import Modal from '../Modal'
-import MonthCalendar from '../MonthCalendar'
-import HabitStatsGrid from '../HabitStatsGrid'
-import HabitEventList from '../HabitEventList'
-import { useHabitDetail } from '../../hooks/useHabitDetail'
-import type { Habit } from '../../lib/api'
-import { diffDays, statusForDue } from '../../lib/date'
-import { getFirstTextChar } from '../../lib/utils'
+import Heatmap from "../Heatmap";
+import Modal from "../Modal";
+import MonthCalendar from "../MonthCalendar";
+import HabitStatsGrid from "../HabitStatsGrid";
+import HabitEventList from "../HabitEventList";
+import { useHabitDetail } from "../../hooks/useHabitDetail";
+import type { Habit } from "../../lib/api";
+import { diffDays, statusForDue } from "../../lib/date";
+import { getFirstTextChar } from "../../lib/utils";
 
 export default function MobileHabitSheet(props: {
-  habitId: string | null
-  onClose: () => void
-  onRefresh: () => void
-  onEdit: (habit: Habit) => void
+  habitId: string | null;
+  onClose: () => void;
+  onRefresh: () => void;
+  onEdit: (habit: Habit) => void;
 }) {
-  const d = useHabitDetail(props.habitId, undefined, props.onRefresh)
-  const [visible, setVisible] = useState(false)
-  const sheetRef = useRef<HTMLDivElement>(null)
-  const dragRef = useRef({ startY: 0, currentY: 0, dragging: false })
+  const d = useHabitDetail(props.habitId, undefined, props.onRefresh);
+  const [visible, setVisible] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ startY: 0, currentY: 0, dragging: false });
 
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true))
-  }, [])
+    requestAnimationFrame(() => setVisible(true));
+  }, []);
 
   function close() {
-    setVisible(false)
-    setTimeout(props.onClose, 200)
+    setVisible(false);
+    setTimeout(props.onClose, 200);
   }
 
   function handleDragStart(e: React.TouchEvent) {
@@ -35,34 +35,34 @@ export default function MobileHabitSheet(props: {
       startY: e.touches[0].clientY,
       currentY: 0,
       dragging: true,
-    }
+    };
   }
 
   function handleDragMove(e: React.TouchEvent) {
-    if (!dragRef.current.dragging) return
-    const delta = e.touches[0].clientY - dragRef.current.startY
-    if (delta < 0) return
-    dragRef.current.currentY = delta
+    if (!dragRef.current.dragging) return;
+    const delta = e.touches[0].clientY - dragRef.current.startY;
+    if (delta < 0) return;
+    dragRef.current.currentY = delta;
     if (sheetRef.current) {
-      sheetRef.current.style.transform = `translateY(${delta}px)`
+      sheetRef.current.style.transform = `translateY(${delta}px)`;
     }
   }
 
   function handleDragEnd() {
-    if (!dragRef.current.dragging) return
-    dragRef.current.dragging = false
+    if (!dragRef.current.dragging) return;
+    dragRef.current.dragging = false;
     if (dragRef.current.currentY > 80) {
-      close()
+      close();
     } else if (sheetRef.current) {
-      sheetRef.current.style.transform = ''
+      sheetRef.current.style.transform = "";
     }
   }
 
-  if (!props.habitId) return null
+  if (!props.habitId) return null;
 
-  const status = statusForDue(d.habit?.nextDueDate ?? '', d.today)
-  const canAct = d.habit ? !d.habit.archived : false
-  const doneToday = !!d.todayDoneEvent
+  const status = statusForDue(d.habit?.nextDueDate ?? "", d.today);
+  const canAct = d.habit ? !d.habit.archived : false;
+  const doneToday = !!d.todayDoneEvent;
 
   return (
     <>
@@ -70,7 +70,7 @@ export default function MobileHabitSheet(props: {
         <button
           type="button"
           className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200 ${
-            visible ? 'opacity-100' : 'opacity-0'
+            visible ? "opacity-100" : "opacity-0"
           }`}
           onClick={close}
           aria-label="Close"
@@ -79,7 +79,7 @@ export default function MobileHabitSheet(props: {
         <div
           ref={sheetRef}
           className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-deep h-[92vh] flex flex-col transition-transform duration-200 ease-out ${
-            visible ? 'translate-y-0' : 'translate-y-full'
+            visible ? "translate-y-0" : "translate-y-full"
           }`}
         >
           {/* 拖拽条 */}
@@ -112,9 +112,7 @@ export default function MobileHabitSheet(props: {
                       {d.habit.icon || getFirstTextChar(d.habit.title)}
                     </span>
                     <div className="min-w-0">
-                      <h2 className="text-[18px] font-bold text-ink truncate">
-                        {d.habit.title}
-                      </h2>
+                      <h2 className="text-[18px] font-bold text-ink truncate">{d.habit.title}</h2>
                       {d.habit.note ? (
                         <div className="text-[14px] text-gray-400 mt-0.5 truncate">
                           {d.habit.note}
@@ -147,8 +145,8 @@ export default function MobileHabitSheet(props: {
                         type="button"
                         className={
                           doneToday
-                            ? 'btn text-[14px] px-3 py-2 border border-[#ef5350] text-[#ef5350] hover:bg-[#fce4ec]'
-                            : 'btn btn-primary text-[14px] px-3 py-2'
+                            ? "btn text-[14px] px-3 py-2 border border-[#ef5350] text-[#ef5350] hover:bg-[#fce4ec]"
+                            : "btn btn-primary text-[14px] px-3 py-2"
                         }
                         onClick={d.handleDone}
                         disabled={d.busy}
@@ -165,29 +163,28 @@ export default function MobileHabitSheet(props: {
                           </>
                         )}
                       </button>
-                      {!doneToday &&
-                        (status === 'overdue' || status === 'today') && (
-                          <>
-                            <button
-                              type="button"
-                              className="btn text-[14px] px-3 py-2"
-                              onClick={d.handlePush}
-                              disabled={d.busy}
-                            >
-                              <span>⏰</span>
-                              <span>明天</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="btn text-[14px] px-3 py-2"
-                              onClick={d.handleSkip}
-                              disabled={d.busy}
-                            >
-                              <span>⏭</span>
-                              <span>跳过</span>
-                            </button>
-                          </>
-                        )}
+                      {!doneToday && (status === "overdue" || status === "today") && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn text-[14px] px-3 py-2"
+                            onClick={d.handlePush}
+                            disabled={d.busy}
+                          >
+                            <span>⏰</span>
+                            <span>明天</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn text-[14px] px-3 py-2"
+                            onClick={d.handleSkip}
+                            disabled={d.busy}
+                          >
+                            <span>⏭</span>
+                            <span>跳过</span>
+                          </button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -203,28 +200,28 @@ export default function MobileHabitSheet(props: {
                     🔄 每{d.habit.intervalDays}天
                   </span>
                   {(() => {
-                    const daysUntil = diffDays(d.today, d.habit.nextDueDate)
-                    const isOverdue = daysUntil < 0
-                    const isToday = daysUntil === 0
+                    const daysUntil = diffDays(d.today, d.habit.nextDueDate);
+                    const isOverdue = daysUntil < 0;
+                    const isToday = daysUntil === 0;
                     const suffix = isOverdue
                       ? `（逾期${Math.abs(daysUntil)}天）`
                       : isToday
-                        ? '（今天）'
+                        ? "（今天）"
                         : daysUntil === 1
-                          ? '（明天）'
-                          : `（还剩${daysUntil}天）`
+                          ? "（明天）"
+                          : `（还剩${daysUntil}天）`;
                     const colorClass = isOverdue
-                      ? 'bg-[#fce4ec] text-[#c62828]'
+                      ? "bg-[#fce4ec] text-[#c62828]"
                       : isToday
-                        ? 'bg-[#fff3e0] text-[#e65100]'
-                        : 'bg-[#e3f2fd] text-[#1565c0]'
+                        ? "bg-[#fff3e0] text-[#e65100]"
+                        : "bg-[#e3f2fd] text-[#1565c0]";
                     return (
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-semibold ${colorClass}`}
                       >
                         📅 {d.habit.nextDueDate} {suffix}
                       </span>
-                    )
+                    );
                   })()}
                 </div>
 
@@ -236,8 +233,8 @@ export default function MobileHabitSheet(props: {
                     events={d.events}
                     nextDueDate={d.habit.nextDueDate}
                     onMonthClick={(y, m) => {
-                      d.setCalYear(y)
-                      d.setCalMonth(m)
+                      d.setCalYear(y);
+                      d.setCalMonth(m);
                     }}
                   />
                 </div>
@@ -254,14 +251,11 @@ export default function MobileHabitSheet(props: {
                     onPrev={() => d.navigateMonth(-1)}
                     onNext={() => d.navigateMonth(1)}
                     onDateClick={async (date, event) => {
-                      if (!d.habit) return
-                      if (
-                        event &&
-                        (event.action === 'done' || event.action === 'push')
-                      ) {
-                        d.setConfirmDeleteEvent(event)
+                      if (!d.habit) return;
+                      if (event && (event.action === "done" || event.action === "push")) {
+                        d.setConfirmDeleteEvent(event);
                       } else {
-                        await d.handleManualDone(date)
+                        await d.handleManualDone(date);
                       }
                     }}
                   />
@@ -269,9 +263,7 @@ export default function MobileHabitSheet(props: {
 
                 {/* 打卡记录 */}
                 <div className="paper px-4 py-3">
-                  <div className="text-[15px] font-semibold text-ink mb-2">
-                    打卡记录
-                  </div>
+                  <div className="text-[15px] font-semibold text-ink mb-2">打卡记录</div>
                   <HabitEventList
                     events={d.currentMonthEvents}
                     calYear={d.calYear}
@@ -305,8 +297,7 @@ export default function MobileHabitSheet(props: {
               type="button"
               className="btn bg-[#ef5350] text-white hover:bg-[#d32f2f] text-[14px] px-4 py-2 border-none"
               onClick={() => {
-                if (d.confirmDeleteEvent)
-                  d.handleDeleteEvent(d.confirmDeleteEvent)
+                if (d.confirmDeleteEvent) d.handleDeleteEvent(d.confirmDeleteEvent);
               }}
               disabled={d.busy}
             >
@@ -318,15 +309,15 @@ export default function MobileHabitSheet(props: {
         <div className="py-2 text-[14px] text-gray-600">
           确定要删除 {d.confirmDeleteEvent?.actionDate} 的
           <span className="font-bold text-ink mx-1">
-            {d.confirmDeleteEvent?.action === 'done'
-              ? '打卡'
-              : d.confirmDeleteEvent?.action === 'push'
-                ? '明天'
-                : '跳过'}
+            {d.confirmDeleteEvent?.action === "done"
+              ? "打卡"
+              : d.confirmDeleteEvent?.action === "push"
+                ? "明天"
+                : "跳过"}
           </span>
           记录吗？该操作无法恢复。
         </div>
       </Modal>
     </>
-  )
+  );
 }

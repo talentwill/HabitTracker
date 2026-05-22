@@ -6,15 +6,20 @@
   --color-warm-white: #f8f4fc;
   --color-muted: #8e7fa8;
   --color-muted-light: #b8a9c9;
-  --color-line: rgba(180,160,200,0.18);
+  --color-line: rgba(180, 160, 200, 0.18);
   --color-accent: #c5a3e3;
   --color-accent-hover: #b39ddb;
   --color-accent-focus: #9c7cb8;
   --color-badge-bg: #f3ecf9;
   --color-badge-text: #9575cd;
   --color-bad: #ef9a9a;
-  --shadow-card: rgba(180,160,200,0.06) 0px 4px 18px, rgba(180,160,200,0.04) 0px 2px 7px, rgba(180,160,200,0.03) 0px 0.5px 2px;
-  --shadow-deep: rgba(180,160,200,0.02) 0px 1px 3px, rgba(180,160,200,0.04) 0px 3px 7px, rgba(180,160,200,0.04) 0px 7px 15px, rgba(180,160,200,0.06) 0px 14px 28px, rgba(180,160,200,0.08) 0px 23px 52px;
+  --shadow-card:
+    rgba(180, 160, 200, 0.06) 0px 4px 18px, rgba(180, 160, 200, 0.04) 0px 2px 7px,
+    rgba(180, 160, 200, 0.03) 0px 0.5px 2px;
+  --shadow-deep:
+    rgba(180, 160, 200, 0.02) 0px 1px 3px, rgba(180, 160, 200, 0.04) 0px 3px 7px,
+    rgba(180, 160, 200, 0.04) 0px 7px 15px, rgba(180, 160, 200, 0.06) 0px 14px 28px,
+    rgba(180, 160, 200, 0.08) 0px 23px 52px;
 }
 
 html,
@@ -26,12 +31,12 @@ body,
 body {
   margin: 0;
   font-family:
-    'Inter',
+    "Inter",
     -apple-system,
     BlinkMacSystemFont,
-    'PingFang SC',
-    'Hiragino Sans GB',
-    'Microsoft YaHei',
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
     system-ui,
     sans-serif;
   color: #4a4458;

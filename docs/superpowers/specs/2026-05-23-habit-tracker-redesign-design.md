@@ -6,19 +6,19 @@
 
 ## 技术栈
 
-| 组件 | 方案 |
-|------|------|
-| 前端框架 | React 19 + TypeScript + React Router 7 (SPA 模式) |
-| 构建工具 | Vite 8 |
-| UI 组件库 | shadcn/ui + Radix UI |
-| 样式 | Tailwind CSS v4 |
-| 字体 | Inter (Google Fonts) |
-| 数据获取 | @tanstack/react-query |
-| 数据库 | Supabase PostgreSQL |
-| 认证 | Supabase Auth (邮箱密码) |
-| 业务逻辑 | PostgreSQL Functions (RPC) |
-| 前端数据库访问 | @supabase/supabase-js |
-| 部署 | Cloudflare Pages |
+| 组件           | 方案                                              |
+| -------------- | ------------------------------------------------- |
+| 前端框架       | React 19 + TypeScript + React Router 7 (SPA 模式) |
+| 构建工具       | Vite 8                                            |
+| UI 组件库      | shadcn/ui + Radix UI                              |
+| 样式           | Tailwind CSS v4                                   |
+| 字体           | Inter (Google Fonts)                              |
+| 数据获取       | @tanstack/react-query                             |
+| 数据库         | Supabase PostgreSQL                               |
+| 认证           | Supabase Auth (邮箱密码)                          |
+| 业务逻辑       | PostgreSQL Functions (RPC)                        |
+| 前端数据库访问 | @supabase/supabase-js                             |
+| 部署           | Cloudflare Pages                                  |
 
 ## 设计系统
 
@@ -26,48 +26,48 @@
 
 ### 颜色
 
-| 角色 | 色值 | 说明 |
-|------|------|------|
-| 背景 | `#f7f4ed` → `#ece5d8` 渐变 | 奶油色渐变背景，非纯色 |
-| 卡片背景 | `rgba(255,255,255,0.6)` + backdrop-filter: blur(10px) | 毛玻璃效果 |
-| 主按钮 | `#8b6f5e` | 赤陶色，暖调深色 |
-| 主按钮文字 | `#fcfbf8` | 暖白 |
-| Ghost 按钮 | `rgba(139,111,94,0.15)` 背景 + `rgba(139,111,94,0.3)` 边框 | 赤陶色淡化 |
-| 主文字 | `#1c1c1c` | 暖炭色 |
-| 次要文字 | `#8a7e6d` | 暖灰 |
-| 标签/元数据 | `#a89a8a` | 更浅暖灰 |
-| 边框 | `rgba(236,234,228,0.9)` | 暖奶油色边框 |
-| Hover 背景 | `rgba(139,111,94,0.06)` | 赤陶色微 tint |
-| 危险色 | `#c0392b` | Overdue / 删除 |
+| 角色        | 色值                                                       | 说明                   |
+| ----------- | ---------------------------------------------------------- | ---------------------- |
+| 背景        | `#f7f4ed` → `#ece5d8` 渐变                                 | 奶油色渐变背景，非纯色 |
+| 卡片背景    | `rgba(255,255,255,0.6)` + backdrop-filter: blur(10px)      | 毛玻璃效果             |
+| 主按钮      | `#8b6f5e`                                                  | 赤陶色，暖调深色       |
+| 主按钮文字  | `#fcfbf8`                                                  | 暖白                   |
+| Ghost 按钮  | `rgba(139,111,94,0.15)` 背景 + `rgba(139,111,94,0.3)` 边框 | 赤陶色淡化             |
+| 主文字      | `#1c1c1c`                                                  | 暖炭色                 |
+| 次要文字    | `#8a7e6d`                                                  | 暖灰                   |
+| 标签/元数据 | `#a89a8a`                                                  | 更浅暖灰               |
+| 边框        | `rgba(236,234,228,0.9)`                                    | 暖奶油色边框           |
+| Hover 背景  | `rgba(139,111,94,0.06)`                                    | 赤陶色微 tint          |
+| 危险色      | `#c0392b`                                                  | Overdue / 删除         |
 
 ### 字体
 
-| 角色 | 大小 | 字重 | 行高 | 字间距 |
-|------|------|------|------|--------|
-| Display | 32px | 600 | 1.10 | -0.8px |
-| Heading | 24px | 600 | 1.20 | -0.5px |
-| Subheading | 18px | 600 | 1.30 | normal |
-| Body | 16px | 400 | 1.50 | normal |
-| Caption | 14px | 400 | 1.50 | normal |
-| Small | 12px | 400 | 1.50 | normal |
+| 角色       | 大小 | 字重 | 行高 | 字间距 |
+| ---------- | ---- | ---- | ---- | ------ |
+| Display    | 32px | 600  | 1.10 | -0.8px |
+| Heading    | 24px | 600  | 1.20 | -0.5px |
+| Subheading | 18px | 600  | 1.30 | normal |
+| Body       | 16px | 400  | 1.50 | normal |
+| Caption    | 14px | 400  | 1.50 | normal |
+| Small      | 12px | 400  | 1.50 | normal |
 
 ### 圆角
 
-| 用途 | 值 |
-|------|------|
-| 按钮 | 8px |
-| 卡片 | 14px |
-| 容器 | 16px |
-| 图标底块 | 10px |
-| Pill | 9999px |
+| 用途     | 值     |
+| -------- | ------ |
+| 按钮     | 8px    |
+| 卡片     | 14px   |
+| 容器     | 16px   |
+| 图标底块 | 10px   |
+| Pill     | 9999px |
 
 ### 阴影
 
-| 用途 | 值 |
-|------|------|
-| 卡片 | `0 1px 3px rgba(28,28,28,0.04)` |
+| 用途       | 值                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------ |
+| 卡片       | `0 1px 3px rgba(28,28,28,0.04)`                                                      |
 | 主按钮内凹 | `rgba(255,255,255,0.2) 0px 0.5px 0px inset, rgba(0,0,0,0.2) 0px 0px 0px 0.5px inset` |
-| Focus | `rgba(0,0,0,0.08) 0px 4px 12px` |
+| Focus      | `rgba(0,0,0,0.08) 0px 4px 12px`                                                      |
 
 ### 间距
 
@@ -132,11 +132,11 @@ app/
 
 ### 数据操作
 
-| 操作 | 方式 |
-|------|------|
-| CRUD habits/tags | `supabase.from('habits').select()...` 直连 |
-| 打卡/跳过/推送 | `supabase.rpc('apply_habit_action', { p_habit_id, p_action })` |
-| 统计 | `supabase.rpc('get_stats_summary')` |
+| 操作             | 方式                                                           |
+| ---------------- | -------------------------------------------------------------- |
+| CRUD habits/tags | `supabase.from('habits').select()...` 直连                     |
+| 打卡/跳过/推送   | `supabase.rpc('apply_habit_action', { p_habit_id, p_action })` |
+| 统计             | `supabase.rpc('get_stats_summary')`                            |
 
 ### Hooks
 
@@ -154,17 +154,17 @@ app/
 
 ### 路由
 
-| 路径 | 页面 | 认证 |
-|------|------|------|
-| `/login` | LoginPage | 否 |
-| `/` | TodayPage | 是 |
-| `/week` | WeekPage | 是 |
-| `/habits` | HabitsPage | 是 |
-| `/habits/:id` | HabitDetailPage | 是 |
-| `/stats` | StatsPage | 是 |
-| `/archived` | ArchivedPage | 是 |
-| `/profile` | ProfilePage | 是 |
-| `/more` | MorePage | 是 |
+| 路径          | 页面            | 认证 |
+| ------------- | --------------- | ---- |
+| `/login`      | LoginPage       | 否   |
+| `/`           | TodayPage       | 是   |
+| `/week`       | WeekPage        | 是   |
+| `/habits`     | HabitsPage      | 是   |
+| `/habits/:id` | HabitDetailPage | 是   |
+| `/stats`      | StatsPage       | 是   |
+| `/archived`   | ArchivedPage    | 是   |
+| `/profile`    | ProfilePage     | 是   |
+| `/more`       | MorePage        | 是   |
 
 ### 布局嵌套
 
@@ -188,9 +188,9 @@ root.tsx
 
 ### 响应式
 
-| 断点 | 布局 |
-|------|------|
-| <768px | 移动端：顶部标题 + 全宽内容 + 底部 Tab |
+| 断点   | 布局                                          |
+| ------ | --------------------------------------------- |
+| <768px | 移动端：顶部标题 + 全宽内容 + 底部 Tab        |
 | ≥768px | 桌面端：TopNav + Sidebar + 内容 + DetailPanel |
 
 ## 组件设计

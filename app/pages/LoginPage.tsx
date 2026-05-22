@@ -1,53 +1,53 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState } from "react";
 
-import { ApiError } from '../lib/api'
-import { useAuth } from '../auth/AuthContext'
+import { ApiError } from "../lib/api";
+import { useAuth } from "../auth/AuthContext";
 
 function errorText(err: unknown): string {
-  if (!(err instanceof ApiError)) return '网络或服务器错误'
+  if (!(err instanceof ApiError)) return "网络或服务器错误";
   switch (err.code) {
-    case 'EMAIL_IN_USE':
-      return '这个邮箱已经注册过了'
-    case 'INVALID_CREDENTIALS':
-      return '邮箱或密码不正确'
-    case 'BAD_REQUEST':
-      return '请检查输入格式（邮箱 / 密码长度）'
+    case "EMAIL_IN_USE":
+      return "这个邮箱已经注册过了";
+    case "INVALID_CREDENTIALS":
+      return "邮箱或密码不正确";
+    case "BAD_REQUEST":
+      return "请检查输入格式（邮箱 / 密码长度）";
     default:
-      return `请求失败：${err.code}`
+      return `请求失败：${err.code}`;
   }
 }
 
 export default function LoginPage() {
-  const { login, register } = useAuth()
-  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const { login, register } = useAuth();
+  const [mode, setMode] = useState<"login" | "register">("login");
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const title = useMemo(() => (mode === 'login' ? '登录' : '注册'), [mode])
+  const title = useMemo(() => (mode === "login" ? "登录" : "注册"), [mode]);
 
   async function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setBusy(true)
-    setError(null)
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
     try {
-      if (mode === 'login') {
-        await login({ email, password })
+      if (mode === "login") {
+        await login({ email, password });
       } else {
         await register({
           email,
           password,
           name: name.trim() ? name.trim() : undefined,
-        })
+        });
       }
     } catch (err) {
-      setError(errorText(err))
+      setError(errorText(err));
     } finally {
-      setBusy(false)
+      setBusy(false);
     }
   }
 
@@ -57,9 +57,7 @@ export default function LoginPage() {
         <div className="paper px-6 py-6 sm:px-8 sm:py-8">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-[14px] font-medium text-muted">
-                Habit Tracker
-              </div>
+              <div className="text-[14px] font-medium text-muted">Habit Tracker</div>
               <h1 className="mt-2 text-[26px] font-bold leading-[1.23] tracking-[-0.625px] text-ink">
                 {title}
               </h1>
@@ -71,7 +69,7 @@ export default function LoginPage() {
           </div>
 
           <form className="mt-6 grid gap-4" onSubmit={onSubmit}>
-            {mode === 'register' ? (
+            {mode === "register" ? (
               <div>
                 <div className="label">昵称（可选）</div>
                 <input
@@ -102,10 +100,8 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === 'register' ? '至少 8 位' : '输入密码'}
-                autoComplete={
-                  mode === 'register' ? 'new-password' : 'current-password'
-                }
+                placeholder={mode === "register" ? "至少 8 位" : "输入密码"}
+                autoComplete={mode === "register" ? "new-password" : "current-password"}
               />
             </div>
 
@@ -116,28 +112,28 @@ export default function LoginPage() {
             ) : null}
 
             <button className="btn btn-primary w-full" disabled={busy}>
-              {busy ? '请稍等…' : mode === 'login' ? '登录' : '创建账号'}
+              {busy ? "请稍等…" : mode === "login" ? "登录" : "创建账号"}
             </button>
 
             <div className="text-center text-[14px] text-muted">
-              {mode === 'login' ? (
+              {mode === "login" ? (
                 <>
-                  还没有账号？{' '}
+                  还没有账号？{" "}
                   <button
                     type="button"
                     className="font-semibold text-accent hover:underline"
-                    onClick={() => setMode('register')}
+                    onClick={() => setMode("register")}
                   >
                     去注册
                   </button>
                 </>
               ) : (
                 <>
-                  已经有账号？{' '}
+                  已经有账号？{" "}
                   <button
                     type="button"
                     className="font-semibold text-accent hover:underline"
-                    onClick={() => setMode('login')}
+                    onClick={() => setMode("login")}
                   >
                     去登录
                   </button>
@@ -152,5 +148,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
