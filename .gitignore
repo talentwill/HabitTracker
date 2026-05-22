@@ -5,3 +5,14 @@
 # React Router
 /.react-router/
 /build/
+
+# Runtime
+.superpowers/
+.playwright-mcp/
+*.log
+
+# Generated
+skills-lock.json
+
+# MCP config
+.mcp.json

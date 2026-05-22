@@ -5,7 +5,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
+  Navigate,
 } from "react-router";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -19,13 +22,13 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
   },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,7 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -41,8 +44,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+function AuthGate() {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="min-h-full grid place-items-center">
+        <div className="paper px-5 py-4 text-sm text-muted">加载中…</div>
+      </div>
+    );
+  }
+
+  // Allow login page without auth
+  if (location.pathname === "/login") {
+    if (user) return <Navigate to="/" replace />;
+    return <Outlet />;
+  }
+
+  // All other routes require auth
+  if (!user) return <Navigate to="/login" replace />;
+
   return <Outlet />;
+}
+
+export default function App() {
+  return <AuthGate />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -53,23 +80,23 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error";
     details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
+      error.status === 404 ? "The requested page could not be found." : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main className="min-h-screen flex items-center justify-center p-4">
+      <div className="paper p-8 max-w-md text-center">
+        <h1 className="text-2xl font-semibold mb-2">{message}</h1>
+        <p className="text-muted">{details}</p>
+        {stack && (
+          <pre className="mt-4 text-xs text-left overflow-x-auto text-muted">
+            <code>{stack}</code>
+          </pre>
+        )}
+      </div>
     </main>
   );
 }
