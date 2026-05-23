@@ -206,6 +206,22 @@ export default function Sidebar() {
         />
       </nav>
 
+      <div className="px-2 pb-2">
+        <div className="label mb-1 px-2">更多</div>
+        <Link
+          to="/more"
+          className={clsx(
+            "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
+            isActive("/more")
+              ? "bg-badge-bg text-accent font-semibold"
+              : "text-muted hover:text-ink hover:bg-warm-white"
+          )}
+        >
+          <span className="text-[15px]">⚙️</span>
+          更多
+        </Link>
+      </div>
+
       <Link
         to="/profile"
         className="border-t border-line px-4 py-3 flex items-center gap-2 hover:bg-warm-white transition"
