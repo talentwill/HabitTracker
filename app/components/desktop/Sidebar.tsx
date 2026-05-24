@@ -45,7 +45,12 @@ function formatClock(d: Date): string {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  collapsed: boolean;
+  toggle: () => void;
+}
+
+export default function Sidebar({ collapsed, toggle }: SidebarProps) {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -101,50 +106,102 @@ export default function Sidebar() {
   }, [todayFilter, location.pathname]);
 
   return (
-    <aside className="hidden sm:flex w-[220px] flex-shrink-0 flex-col border-r border-line bg-paper h-screen sticky top-0">
-      <div className="px-4 pt-5 pb-2">
-        <div className="text-[16px] font-bold tracking-[-0.25px] text-ink">Habit Tracker</div>
-        <div className="mt-1 text-[12px] text-muted">
-          {todayDateOnly()} {clock}
-        </div>
+    <aside
+      className={clsx(
+        "hidden sm:flex flex-shrink-0 flex-col border-r border-line bg-paper h-screen sticky top-0 transition-all duration-300 ease-in-out",
+        collapsed ? "w-[56px]" : "w-[220px]"
+      )}
+    >
+      <div
+        className={clsx("pt-5 pb-2 cursor-pointer", collapsed ? "px-0 text-center" : "px-4")}
+        onClick={toggle}
+        title={collapsed ? "展开侧边栏" : "收起侧边栏"}
+      >
+        {collapsed ? (
+          <div className="text-[18px] font-bold text-ink">H</div>
+        ) : (
+          <>
+            <div className="text-[16px] font-bold tracking-[-0.25px] text-ink">Habit Tracker</div>
+            <div className="mt-1 text-[12px] text-muted">
+              {todayDateOnly()} {clock}
+            </div>
+          </>
+        )}
       </div>
 
-      <nav className="mt-4 flex-1 px-2 overflow-y-auto">
-        <div className="label mb-1 px-2">视图</div>
-        {viewItems.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className={clsx(
-              "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
-              isActive(item.to)
-                ? "bg-badge-bg text-accent font-semibold"
-                : "text-muted hover:text-ink hover:bg-warm-white"
-            )}
-          >
-            <span className="text-[15px]">{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
+      <nav
+        className={clsx(
+          "mt-4 flex-1 overflow-y-auto",
+          collapsed ? "px-1 flex flex-col items-center gap-1" : "px-2"
+        )}
+      >
+        {!collapsed && <div className="label mb-1 px-2">视图</div>}
+        {viewItems.map((item) =>
+          collapsed ? (
+            <Link
+              key={item.to}
+              to={item.to}
+              title={item.label}
+              className={clsx(
+                "flex items-center justify-center w-10 h-9 rounded-lg transition",
+                isActive(item.to)
+                  ? "bg-badge-bg text-accent"
+                  : "text-muted hover:text-ink hover:bg-warm-white"
+              )}
+            >
+              <span className="text-[18px]">{item.icon}</span>
+            </Link>
+          ) : (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={clsx(
+                "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
+                isActive(item.to)
+                  ? "bg-badge-bg text-accent font-semibold"
+                  : "text-muted hover:text-ink hover:bg-warm-white"
+              )}
+            >
+              <span className="text-[15px]">{item.icon}</span>
+              {item.label}
+            </Link>
+          )
+        )}
 
-        <div className="label mt-5 mb-1 px-2">分析</div>
-        {analyticsItems.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className={clsx(
-              "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
-              isActive(item.to)
-                ? "bg-badge-bg text-accent font-semibold"
-                : "text-muted hover:text-ink hover:bg-warm-white"
-            )}
-          >
-            <span className="text-[15px]">{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
+        {!collapsed && <div className="label mt-5 mb-1 px-2">分析</div>}
+        {analyticsItems.map((item) =>
+          collapsed ? (
+            <Link
+              key={item.to}
+              to={item.to}
+              title={item.label}
+              className={clsx(
+                "flex items-center justify-center w-10 h-9 rounded-lg transition",
+                isActive(item.to)
+                  ? "bg-badge-bg text-accent"
+                  : "text-muted hover:text-ink hover:bg-warm-white"
+              )}
+            >
+              <span className="text-[18px]">{item.icon}</span>
+            </Link>
+          ) : (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={clsx(
+                "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
+                isActive(item.to)
+                  ? "bg-badge-bg text-accent font-semibold"
+                  : "text-muted hover:text-ink hover:bg-warm-white"
+              )}
+            >
+              <span className="text-[15px]">{item.icon}</span>
+              {item.label}
+            </Link>
+          )
+        )}
 
-        {tags.length > 0 && (
+        {!collapsed && tags.length > 0 && (
           <>
             <div className="label mt-5 mb-1 px-2">标签</div>
             <button
@@ -184,15 +241,17 @@ export default function Sidebar() {
             })}
           </>
         )}
-        <button
-          type="button"
-          className="mt-1 mx-2 flex items-center gap-1 text-[12px] text-muted hover:text-accent transition"
-          onClick={() => setManagerOpen(true)}
-          title="管理标签"
-        >
-          <span>+</span>
-          <span>管理标签</span>
-        </button>
+        {!collapsed && (
+          <button
+            type="button"
+            className="mt-1 mx-2 flex items-center gap-1 text-[12px] text-muted hover:text-accent transition"
+            onClick={() => setManagerOpen(true)}
+            title="管理标签"
+          >
+            <span>+</span>
+            <span>管理标签</span>
+          </button>
+        )}
         <TagManager
           open={managerOpen}
           onClose={() => setManagerOpen(false)}
@@ -206,34 +265,41 @@ export default function Sidebar() {
         />
       </nav>
 
-      <div className="px-2 pb-2">
-        <div className="label mb-1 px-2">更多</div>
+      <div className={clsx("pb-2", collapsed ? "px-1" : "px-2")}>
+        {!collapsed && <div className="label mb-1 px-2">更多</div>}
         <Link
           to="/more"
+          title="更多"
           className={clsx(
-            "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
+            "flex items-center rounded-lg transition",
+            collapsed ? "justify-center w-10 h-9" : "gap-2 px-3 py-[7px] text-[14px] font-medium",
             isActive("/more")
               ? "bg-badge-bg text-accent font-semibold"
               : "text-muted hover:text-ink hover:bg-warm-white"
           )}
         >
-          <span className="text-[15px]">⚙️</span>
-          更多
+          <span className={collapsed ? "text-[18px]" : "text-[15px]"}>⚙️</span>
+          {!collapsed && "更多"}
         </Link>
       </div>
 
       <Link
         to="/profile"
-        className="border-t border-line px-4 py-3 flex items-center gap-2 hover:bg-warm-white transition"
+        className={clsx(
+          "border-t border-line transition hover:bg-warm-white",
+          collapsed ? "px-0 py-3 flex justify-center" : "px-4 py-3 flex items-center gap-2"
+        )}
       >
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-warm-white text-[13px] font-bold text-muted">
           {(user?.name || user?.email || "U")[0]?.toUpperCase()}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold text-ink">
-            {user?.name || user?.email}
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13px] font-semibold text-ink">
+              {user?.name || user?.email}
+            </div>
           </div>
-        </div>
+        )}
       </Link>
     </aside>
   );
