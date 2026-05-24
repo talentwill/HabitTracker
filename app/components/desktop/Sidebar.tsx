@@ -156,8 +156,8 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
           <>
             <div className="flex items-center justify-between">
               <div className="text-[16px] font-bold tracking-[-0.25px] text-ink">Habit Tracker</div>
-              <span className="text-[12px] text-muted hover:text-ink transition" title="收起侧边栏">
-                ◁
+              <span className="text-[14px] text-muted hover:text-ink transition" title="收起侧边栏">
+                ☰
               </span>
             </div>
             <div className="mt-1 text-[12px] text-muted">
