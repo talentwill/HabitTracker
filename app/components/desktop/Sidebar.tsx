@@ -45,7 +45,45 @@ function formatClock(d: Date): string {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 }
 
-export default function Sidebar() {
+function SidebarLink({
+  to,
+  icon,
+  label,
+  collapsed,
+  active,
+}: {
+  to: string;
+  icon: string;
+  label: string;
+  collapsed: boolean;
+  active: boolean;
+}) {
+  return (
+    <Link
+      to={to}
+      title={collapsed ? label : undefined}
+      className={clsx(
+        "flex items-center rounded-lg transition",
+        collapsed ? "justify-center w-10 h-9" : "gap-2 px-3 py-[7px] text-[14px] font-medium",
+        active
+          ? collapsed
+            ? "bg-badge-bg text-accent"
+            : "bg-badge-bg text-accent font-semibold"
+          : "text-muted hover:text-ink hover:bg-warm-white"
+      )}
+    >
+      <span className={collapsed ? "text-[18px]" : "text-[15px]"}>{icon}</span>
+      {!collapsed && label}
+    </Link>
+  );
+}
+
+interface SidebarProps {
+  collapsed: boolean;
+  toggle: () => void;
+}
+
+export default function Sidebar({ collapsed, toggle }: SidebarProps) {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -101,50 +139,65 @@ export default function Sidebar() {
   }, [todayFilter, location.pathname]);
 
   return (
-    <aside className="hidden sm:flex w-[220px] flex-shrink-0 flex-col border-r border-line bg-paper h-screen sticky top-0">
-      <div className="px-4 pt-5 pb-2">
-        <div className="text-[16px] font-bold tracking-[-0.25px] text-ink">Habit Tracker</div>
-        <div className="mt-1 text-[12px] text-muted">
-          {todayDateOnly()} {clock}
-        </div>
+    <aside
+      className={clsx(
+        "hidden sm:flex flex-shrink-0 flex-col border-r border-line bg-paper h-screen sticky top-0",
+        collapsed ? "w-[56px]" : "w-[220px]"
+      )}
+    >
+      <div
+        className={clsx("pt-5 pb-2 cursor-pointer", collapsed ? "px-0 text-center" : "px-4")}
+        onClick={toggle}
+        title={collapsed ? "展开侧边栏" : "收起侧边栏"}
+      >
+        {collapsed ? (
+          <div className="text-[18px] font-bold text-ink">H</div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <div className="text-[16px] font-bold tracking-[-0.25px] text-ink">Habit Tracker</div>
+              <span className="text-[14px] text-muted hover:text-ink transition" title="收起侧边栏">
+                ☰
+              </span>
+            </div>
+            <div className="mt-1 text-[12px] text-muted">
+              {todayDateOnly()} {clock}
+            </div>
+          </>
+        )}
       </div>
 
-      <nav className="mt-4 flex-1 px-2 overflow-y-auto">
-        <div className="label mb-1 px-2">视图</div>
+      <nav
+        className={clsx(
+          "mt-4 flex-1 overflow-y-auto",
+          collapsed ? "px-1 flex flex-col items-center gap-1" : "px-2"
+        )}
+      >
+        {!collapsed && <div className="label mb-1 px-2">视图</div>}
         {viewItems.map((item) => (
-          <Link
+          <SidebarLink
             key={item.to}
             to={item.to}
-            className={clsx(
-              "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
-              isActive(item.to)
-                ? "bg-badge-bg text-accent font-semibold"
-                : "text-muted hover:text-ink hover:bg-warm-white"
-            )}
-          >
-            <span className="text-[15px]">{item.icon}</span>
-            {item.label}
-          </Link>
+            icon={item.icon}
+            label={item.label}
+            collapsed={collapsed}
+            active={isActive(item.to)}
+          />
         ))}
 
-        <div className="label mt-5 mb-1 px-2">分析</div>
+        {!collapsed && <div className="label mt-5 mb-1 px-2">分析</div>}
         {analyticsItems.map((item) => (
-          <Link
+          <SidebarLink
             key={item.to}
             to={item.to}
-            className={clsx(
-              "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
-              isActive(item.to)
-                ? "bg-badge-bg text-accent font-semibold"
-                : "text-muted hover:text-ink hover:bg-warm-white"
-            )}
-          >
-            <span className="text-[15px]">{item.icon}</span>
-            {item.label}
-          </Link>
+            icon={item.icon}
+            label={item.label}
+            collapsed={collapsed}
+            active={isActive(item.to)}
+          />
         ))}
 
-        {tags.length > 0 && (
+        {!collapsed && tags.length > 0 && (
           <>
             <div className="label mt-5 mb-1 px-2">标签</div>
             <button
@@ -184,15 +237,17 @@ export default function Sidebar() {
             })}
           </>
         )}
-        <button
-          type="button"
-          className="mt-1 mx-2 flex items-center gap-1 text-[12px] text-muted hover:text-accent transition"
-          onClick={() => setManagerOpen(true)}
-          title="管理标签"
-        >
-          <span>+</span>
-          <span>管理标签</span>
-        </button>
+        {!collapsed && (
+          <button
+            type="button"
+            className="mt-1 mx-2 flex items-center gap-1 text-[12px] text-muted hover:text-accent transition"
+            onClick={() => setManagerOpen(true)}
+            title="管理标签"
+          >
+            <span>+</span>
+            <span>管理标签</span>
+          </button>
+        )}
         <TagManager
           open={managerOpen}
           onClose={() => setManagerOpen(false)}
@@ -206,34 +261,34 @@ export default function Sidebar() {
         />
       </nav>
 
-      <div className="px-2 pb-2">
-        <div className="label mb-1 px-2">更多</div>
-        <Link
+      <div className={clsx("pb-2", collapsed ? "px-1" : "px-2")}>
+        {!collapsed && <div className="label mb-1 px-2">更多</div>}
+        <SidebarLink
           to="/more"
-          className={clsx(
-            "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
-            isActive("/more")
-              ? "bg-badge-bg text-accent font-semibold"
-              : "text-muted hover:text-ink hover:bg-warm-white"
-          )}
-        >
-          <span className="text-[15px]">⚙️</span>
-          更多
-        </Link>
+          icon="⚙️"
+          label="更多"
+          collapsed={collapsed}
+          active={isActive("/more")}
+        />
       </div>
 
       <Link
         to="/profile"
-        className="border-t border-line px-4 py-3 flex items-center gap-2 hover:bg-warm-white transition"
+        className={clsx(
+          "border-t border-line transition hover:bg-warm-white",
+          collapsed ? "px-0 py-3 flex justify-center" : "px-4 py-3 flex items-center gap-2"
+        )}
       >
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-warm-white text-[13px] font-bold text-muted">
           {(user?.name || user?.email || "U")[0]?.toUpperCase()}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-semibold text-ink">
-            {user?.name || user?.email}
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13px] font-semibold text-ink">
+              {user?.name || user?.email}
+            </div>
           </div>
-        </div>
+        )}
       </Link>
     </aside>
   );
