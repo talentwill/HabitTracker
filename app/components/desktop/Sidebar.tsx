@@ -45,6 +45,39 @@ function formatClock(d: Date): string {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 }
 
+function SidebarLink({
+  to,
+  icon,
+  label,
+  collapsed,
+  active,
+}: {
+  to: string;
+  icon: string;
+  label: string;
+  collapsed: boolean;
+  active: boolean;
+}) {
+  return (
+    <Link
+      to={to}
+      title={collapsed ? label : undefined}
+      className={clsx(
+        "flex items-center rounded-lg transition",
+        collapsed ? "justify-center w-10 h-9" : "gap-2 px-3 py-[7px] text-[14px] font-medium",
+        active
+          ? collapsed
+            ? "bg-badge-bg text-accent"
+            : "bg-badge-bg text-accent font-semibold"
+          : "text-muted hover:text-ink hover:bg-warm-white"
+      )}
+    >
+      <span className={collapsed ? "text-[18px]" : "text-[15px]"}>{icon}</span>
+      {!collapsed && label}
+    </Link>
+  );
+}
+
 interface SidebarProps {
   collapsed: boolean;
   toggle: () => void;
@@ -136,70 +169,28 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
         )}
       >
         {!collapsed && <div className="label mb-1 px-2">视图</div>}
-        {viewItems.map((item) =>
-          collapsed ? (
-            <Link
-              key={item.to}
-              to={item.to}
-              title={item.label}
-              className={clsx(
-                "flex items-center justify-center w-10 h-9 rounded-lg transition",
-                isActive(item.to)
-                  ? "bg-badge-bg text-accent"
-                  : "text-muted hover:text-ink hover:bg-warm-white"
-              )}
-            >
-              <span className="text-[18px]">{item.icon}</span>
-            </Link>
-          ) : (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={clsx(
-                "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
-                isActive(item.to)
-                  ? "bg-badge-bg text-accent font-semibold"
-                  : "text-muted hover:text-ink hover:bg-warm-white"
-              )}
-            >
-              <span className="text-[15px]">{item.icon}</span>
-              {item.label}
-            </Link>
-          )
-        )}
+        {viewItems.map((item) => (
+          <SidebarLink
+            key={item.to}
+            to={item.to}
+            icon={item.icon}
+            label={item.label}
+            collapsed={collapsed}
+            active={isActive(item.to)}
+          />
+        ))}
 
         {!collapsed && <div className="label mt-5 mb-1 px-2">分析</div>}
-        {analyticsItems.map((item) =>
-          collapsed ? (
-            <Link
-              key={item.to}
-              to={item.to}
-              title={item.label}
-              className={clsx(
-                "flex items-center justify-center w-10 h-9 rounded-lg transition",
-                isActive(item.to)
-                  ? "bg-badge-bg text-accent"
-                  : "text-muted hover:text-ink hover:bg-warm-white"
-              )}
-            >
-              <span className="text-[18px]">{item.icon}</span>
-            </Link>
-          ) : (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={clsx(
-                "flex items-center gap-2 rounded-lg px-3 py-[7px] text-[14px] font-medium transition",
-                isActive(item.to)
-                  ? "bg-badge-bg text-accent font-semibold"
-                  : "text-muted hover:text-ink hover:bg-warm-white"
-              )}
-            >
-              <span className="text-[15px]">{item.icon}</span>
-              {item.label}
-            </Link>
-          )
-        )}
+        {analyticsItems.map((item) => (
+          <SidebarLink
+            key={item.to}
+            to={item.to}
+            icon={item.icon}
+            label={item.label}
+            collapsed={collapsed}
+            active={isActive(item.to)}
+          />
+        ))}
 
         {!collapsed && tags.length > 0 && (
           <>
@@ -267,20 +258,13 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
 
       <div className={clsx("pb-2", collapsed ? "px-1" : "px-2")}>
         {!collapsed && <div className="label mb-1 px-2">更多</div>}
-        <Link
+        <SidebarLink
           to="/more"
-          title="更多"
-          className={clsx(
-            "flex items-center rounded-lg transition",
-            collapsed ? "justify-center w-10 h-9" : "gap-2 px-3 py-[7px] text-[14px] font-medium",
-            isActive("/more")
-              ? "bg-badge-bg text-accent font-semibold"
-              : "text-muted hover:text-ink hover:bg-warm-white"
-          )}
-        >
-          <span className={collapsed ? "text-[18px]" : "text-[15px]"}>⚙️</span>
-          {!collapsed && "更多"}
-        </Link>
+          icon="⚙️"
+          label="更多"
+          collapsed={collapsed}
+          active={isActive("/more")}
+        />
       </div>
 
       <Link
