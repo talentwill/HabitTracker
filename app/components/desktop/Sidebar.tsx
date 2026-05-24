@@ -141,7 +141,7 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
   return (
     <aside
       className={clsx(
-        "hidden sm:flex flex-shrink-0 flex-col border-r border-line bg-paper h-screen sticky top-0 transition-all duration-300 ease-in-out",
+        "hidden sm:flex flex-shrink-0 flex-col border-r border-line bg-paper h-screen sticky top-0",
         collapsed ? "w-[56px]" : "w-[220px]"
       )}
     >
@@ -154,7 +154,12 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
           <div className="text-[18px] font-bold text-ink">H</div>
         ) : (
           <>
-            <div className="text-[16px] font-bold tracking-[-0.25px] text-ink">Habit Tracker</div>
+            <div className="flex items-center justify-between">
+              <div className="text-[16px] font-bold tracking-[-0.25px] text-ink">Habit Tracker</div>
+              <span className="text-[12px] text-muted hover:text-ink transition" title="收起侧边栏">
+                ◁
+              </span>
+            </div>
             <div className="mt-1 text-[12px] text-muted">
               {todayDateOnly()} {clock}
             </div>
