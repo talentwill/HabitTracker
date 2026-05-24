@@ -4,13 +4,16 @@ const STORAGE_KEY = "sidebarCollapsed";
 
 export function useSidebarCollapsed() {
   const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "true";
   });
 
   const toggle = useCallback(() => {
     setCollapsed((prev) => {
       const next = !prev;
-      localStorage.setItem(STORAGE_KEY, String(next));
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, String(next));
+      }
       return next;
     });
   }, []);
