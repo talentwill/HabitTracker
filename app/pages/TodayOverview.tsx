@@ -340,6 +340,7 @@ export default function TodayOverview() {
       }
       if (updated) {
         setHabits((prev) => prev.map((h) => (h.id === updated!.id ? updated! : h)));
+        setDetailRefreshKey((k) => k + 1);
       }
       // Only refresh stats, not the full list
       try {

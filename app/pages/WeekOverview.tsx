@@ -119,6 +119,7 @@ export default function WeekOverview() {
       }
       if (updated) {
         setHabits((prev) => prev.map((h) => (h.id === updated!.id ? updated! : h)));
+        setDetailRefreshKey((k) => k + 1);
       }
       try {
         const sRes = await api.summary();
