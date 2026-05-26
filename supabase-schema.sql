@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS habits (
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   note TEXT NOT NULL DEFAULT '',
-  interval_days INTEGER NOT NULL DEFAULT 1,
+  interval_days INTEGER NOT NULL DEFAULT 1 CHECK (interval_days >= 1),
   next_due_date TEXT NOT NULL,
   start_date TEXT NOT NULL DEFAULT '',
   archived BOOLEAN NOT NULL DEFAULT false,
@@ -145,6 +145,7 @@ BEGIN
   SELECT * INTO v_habit FROM habits WHERE id = p_habit_id AND user_id = auth.uid();
   IF NOT FOUND THEN RAISE EXCEPTION 'NOT_FOUND'; END IF;
   IF v_habit.archived THEN RAISE EXCEPTION 'HABIT_ARCHIVED'; END IF;
+  IF v_habit.interval_days < 1 THEN RAISE EXCEPTION 'INVALID_INTERVAL'; END IF;
 
   v_from_due := v_habit.next_due_date;
 
@@ -211,6 +212,135 @@ BEGIN
       ORDER BY he.created_at DESC LIMIT 20
     )
   ) INTO v_result;
+  RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- RPC: manual_done (atomic backfill check-in for past dates)
+CREATE OR REPLACE FUNCTION manual_done(
+  p_habit_id UUID,
+  p_action_date DATE
+)
+RETURNS habits AS $$
+DECLARE
+  v_habit habits%ROWTYPE;
+  v_today DATE := (now() AT TIME ZONE 'UTC' + INTERVAL '8 hours')::date;
+  v_new_due DATE;
+  v_existing_id UUID;
+BEGIN
+  SELECT * INTO v_habit FROM habits WHERE id = p_habit_id AND user_id = auth.uid();
+  IF NOT FOUND THEN RAISE EXCEPTION 'NOT_FOUND'; END IF;
+  IF v_habit.archived THEN RAISE EXCEPTION 'HABIT_ARCHIVED'; END IF;
+  IF v_habit.interval_days < 1 THEN RAISE EXCEPTION 'INVALID_INTERVAL'; END IF;
+
+  IF p_action_date > v_today THEN RAISE EXCEPTION 'FUTURE_DATE'; END IF;
+  IF v_habit.start_date != '' AND p_action_date < v_habit.start_date::date THEN
+    RAISE EXCEPTION 'BEFORE_START_DATE';
+  END IF;
+
+  SELECT id INTO v_existing_id FROM habit_events
+  WHERE habit_id = p_habit_id AND action_date = p_action_date AND action = 'done';
+  IF v_existing_id IS NOT NULL THEN RAISE EXCEPTION 'ALREADY_DONE'; END IF;
+
+  v_new_due := p_action_date + GREATEST(v_habit.interval_days, 1);
+
+  INSERT INTO habit_events (user_id, habit_id, action, action_date, from_due_date, to_due_date)
+  VALUES (auth.uid(), p_habit_id, 'done', p_action_date, v_habit.next_due_date, v_new_due::text);
+
+  IF v_new_due > v_habit.next_due_date::date THEN
+    UPDATE habits SET next_due_date = v_new_due::text, updated_at = now()
+    WHERE id = p_habit_id;
+  END IF;
+
+  SELECT * INTO v_habit FROM habits WHERE id = p_habit_id;
+  RETURN v_habit;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- RPC: list_habits
+CREATE OR REPLACE FUNCTION list_habits(p_archived BOOLEAN)
+RETURNS JSON AS $$
+DECLARE
+  v_result JSON;
+BEGIN
+  SELECT json_agg(sub) INTO v_result
+  FROM (
+    SELECT json_build_object(
+      'id', h.id,
+      'title', h.title,
+      'note', h.note,
+      'intervalDays', h.interval_days,
+      'nextDueDate', h.next_due_date,
+      'startDate', h.start_date,
+      'archived', h.archived,
+      'icon', h.icon,
+      'createdAt', h.created_at,
+      'updatedAt', h.updated_at,
+      'tag', t.name,
+      'lastDoneDate', last_done.last_done_date,
+      'lastAction', last_evt.last_action,
+      'lastActionDate', last_evt.last_action_date
+    ) as sub
+    FROM habits h
+    LEFT JOIN tags t ON t.id = h.tag_id
+    LEFT JOIN LATERAL (
+      SELECT he.action AS last_action, he.action_date AS last_action_date
+      FROM habit_events he
+      WHERE he.habit_id = h.id
+      ORDER BY he.created_at DESC LIMIT 1
+    ) last_evt ON true
+    LEFT JOIN LATERAL (
+      SELECT he.action_date AS last_done_date
+      FROM habit_events he
+      WHERE he.habit_id = h.id AND he.action = 'done'
+      ORDER BY he.action_date DESC LIMIT 1
+    ) last_done ON true
+    WHERE h.user_id = auth.uid() AND h.archived = p_archived
+    ORDER BY h.next_due_date ASC
+  ) ordered;
+
+  RETURN COALESCE(v_result, '[]'::json);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- RPC: get_habit_detail
+CREATE OR REPLACE FUNCTION get_habit_detail(p_habit_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  v_result JSON;
+BEGIN
+  SELECT json_build_object(
+    'id', h.id,
+    'title', h.title,
+    'note', h.note,
+    'intervalDays', h.interval_days,
+    'nextDueDate', h.next_due_date,
+    'startDate', h.start_date,
+    'archived', h.archived,
+    'icon', h.icon,
+    'createdAt', h.created_at,
+    'updatedAt', h.updated_at,
+    'tag', t.name,
+    'lastDoneDate', last_done.last_done_date,
+    'lastAction', last_evt.last_action,
+    'lastActionDate', last_evt.last_action_date
+  ) INTO v_result
+  FROM habits h
+  LEFT JOIN tags t ON t.id = h.tag_id
+  LEFT JOIN LATERAL (
+    SELECT he.action AS last_action, he.action_date AS last_action_date
+    FROM habit_events he
+    WHERE he.habit_id = h.id
+    ORDER BY he.created_at DESC LIMIT 1
+  ) last_evt ON true
+  LEFT JOIN LATERAL (
+    SELECT he.action_date AS last_done_date
+    FROM habit_events he
+    WHERE he.habit_id = h.id AND he.action = 'done'
+    ORDER BY he.action_date DESC LIMIT 1
+  ) last_done ON true
+  WHERE h.id = p_habit_id AND h.user_id = auth.uid();
+
   RETURN v_result;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

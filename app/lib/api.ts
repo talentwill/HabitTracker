@@ -498,68 +498,28 @@ export async function habitEvents(id: string): Promise<{ events: HabitEvent[] }>
 }
 
 export async function habitManualDone(id: string, actionDate: string): Promise<{ habit: Habit }> {
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-  if (!authUser) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
-
-  // Validate: get habit first
-  const { data: habit, error: habitError } = await supabase
-    .from("habits")
-    .select("*")
-    .eq("id", id)
-    .eq("user_id", authUser.id)
-    .single();
-
-  if (habitError || !habit) {
-    throw new ApiError({ status: 404, code: "NOT_FOUND" });
-  }
-  if (habit.archived) {
-    throw new ApiError({ status: 400, code: "HABIT_ARCHIVED" });
-  }
-
-  const today = todayDateOnly();
-  if (actionDate > today) {
-    throw new ApiError({ status: 400, code: "FUTURE_DATE" });
-  }
-  if (habit.start_date && actionDate < habit.start_date) {
-    throw new ApiError({ status: 400, code: "BEFORE_START_DATE" });
-  }
-
-  // Check if already done on that date
-  const { data: existing } = await supabase
-    .from("habit_events")
-    .select("id")
-    .eq("habit_id", id)
-    .eq("action_date", actionDate)
-    .eq("action", "done")
-    .maybeSingle();
-
-  if (existing) {
-    throw new ApiError({ status: 409, code: "ALREADY_DONE" });
-  }
-
-  // Calculate new next_due_date
-  const interval = habit.interval_days || 1;
-  const newDueDate = addDays(actionDate, interval);
-
-  const fromDueDate = habit.next_due_date;
-
-  await supabase.from("habit_events").insert({
-    user_id: authUser.id,
-    habit_id: id,
-    action: "done",
-    action_date: actionDate,
-    from_due_date: fromDueDate,
-    to_due_date: newDueDate,
+  const { error } = await supabase.rpc("manual_done", {
+    p_habit_id: id,
+    p_action_date: actionDate,
   });
 
-  // Update next_due_date only if newDueDate is further out
-  if (newDueDate > habit.next_due_date) {
-    await supabase
-      .from("habits")
-      .update({ next_due_date: newDueDate, updated_at: new Date().toISOString() })
-      .eq("id", id);
+  if (error) {
+    if (error.message.includes("NOT_FOUND")) {
+      throw new ApiError({ status: 404, code: "NOT_FOUND" });
+    }
+    if (error.message.includes("HABIT_ARCHIVED")) {
+      throw new ApiError({ status: 400, code: "HABIT_ARCHIVED" });
+    }
+    if (error.message.includes("FUTURE_DATE")) {
+      throw new ApiError({ status: 400, code: "FUTURE_DATE" });
+    }
+    if (error.message.includes("BEFORE_START_DATE")) {
+      throw new ApiError({ status: 400, code: "BEFORE_START_DATE" });
+    }
+    if (error.message.includes("ALREADY_DONE")) {
+      throw new ApiError({ status: 409, code: "ALREADY_DONE" });
+    }
+    throw new ApiError({ status: 500, code: error.message });
   }
 
   return getHabit(id);
@@ -744,7 +704,7 @@ export async function exportHabits(): Promise<Blob> {
   if (!authUser) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
 
   const [habitsRes, eventsRes] = await Promise.all([
-    supabase.from("habits").select("*").eq("user_id", authUser.id),
+    supabase.from("habits").select("*, tags(name)").eq("user_id", authUser.id),
     supabase.from("habit_events").select("*").eq("user_id", authUser.id),
   ]);
 
@@ -759,22 +719,8 @@ export async function exportHabits(): Promise<Blob> {
     icon: h.icon,
     createdAt: h.created_at,
     updatedAt: h.updated_at,
-    tagName: null as string | null,
+    tagName: ((h.tags as unknown as Record<string, unknown> | null)?.name as string | null) ?? null,
   }));
-
-  // Resolve tag names
-  for (const h of habits) {
-    if (h.id) {
-      const { data: habitWithTags } = await supabase
-        .from("habits")
-        .select("tags(name)")
-        .eq("id", h.id)
-        .single();
-      if (habitWithTags?.tags) {
-        h.tagName = (habitWithTags.tags as unknown as Record<string, unknown>).name as string;
-      }
-    }
-  }
 
   const events = (eventsRes.data ?? []).map((e) => ({
     id: e.id,
@@ -839,19 +785,31 @@ export async function importHabits(
     }
   }
 
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+  const VALID_ACTIONS = new Set(["done", "push", "skip"]);
+
   // Insert habits
   const habitIds = new Set<string>();
   for (const h of body.habits) {
+    const title = h.title as string;
+    if (!title || title.length > 200) continue;
+    const intervalDays = h.intervalDays as number;
+    if (!Number.isInteger(intervalDays) || intervalDays < 1 || intervalDays > 365) continue;
+    const nextDueDate = h.nextDueDate as string;
+    if (!DATE_RE.test(nextDueDate)) continue;
+    const startDate = h.startDate as string;
+    if (startDate && !DATE_RE.test(startDate)) continue;
+
     const tagId = h.tagName ? (tagMap.get(h.tagName as string) ?? null) : null;
     const { error } = await supabase.from("habits").insert({
       id: h.id as string,
       user_id: authUser.id,
-      title: h.title as string,
-      note: h.note as string,
-      interval_days: h.intervalDays as number,
-      next_due_date: h.nextDueDate as string,
-      start_date: h.startDate as string,
-      archived: h.archived as boolean,
+      title,
+      note: (h.note as string) ?? "",
+      interval_days: intervalDays,
+      next_due_date: nextDueDate,
+      start_date: startDate ?? "",
+      archived: Boolean(h.archived),
       tag_id: tagId,
       icon: h.icon as string | null,
       created_at: h.createdAt as string,
@@ -864,14 +822,19 @@ export async function importHabits(
   let eventCount = 0;
   for (const e of body.events) {
     if (!habitIds.has(e.habitId as string)) continue;
+    const action = e.action as string;
+    if (!VALID_ACTIONS.has(action)) continue;
+    const actionDate = e.actionDate as string;
+    if (!DATE_RE.test(actionDate)) continue;
+
     const { error } = await supabase.from("habit_events").insert({
       id: e.id as string,
       user_id: authUser.id,
       habit_id: e.habitId as string,
-      action: e.action as string,
-      action_date: e.actionDate as string,
-      from_due_date: e.fromDueDate as string | null,
-      to_due_date: e.toDueDate as string | null,
+      action,
+      action_date: actionDate,
+      from_due_date: (e.fromDueDate as string) ?? null,
+      to_due_date: (e.toDueDate as string) ?? null,
       created_at: e.createdAt as string,
     });
     if (!error) eventCount++;
