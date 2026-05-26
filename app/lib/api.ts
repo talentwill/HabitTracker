@@ -467,6 +467,7 @@ async function applyAction(
   const { error } = await supabase.rpc("apply_habit_action", {
     p_habit_id: habitId,
     p_action: action,
+    p_action_date: todayDateOnly(),
   });
 
   if (error) {
@@ -727,7 +728,9 @@ export async function deleteTag(id: string): Promise<{ ok: boolean }> {
 // --- Stats ---
 
 export async function summary(): Promise<StatsSummary> {
-  const { data, error } = await supabase.rpc("get_stats_summary");
+  const { data, error } = await supabase.rpc("get_stats_summary", {
+    p_today: todayDateOnly(),
+  });
   if (error) throw new ApiError({ status: 500, code: error.message });
   return data as unknown as StatsSummary;
 }

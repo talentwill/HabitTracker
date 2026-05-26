@@ -131,15 +131,16 @@ CREATE POLICY "Users can CRUD own events"
 -- RPC: apply_habit_action (core check-in logic)
 CREATE OR REPLACE FUNCTION apply_habit_action(
   p_habit_id UUID,
-  p_action TEXT
+  p_action TEXT,
+  p_action_date DATE DEFAULT NULL
 )
 RETURNS habits AS $$
 DECLARE
   v_habit habits%ROWTYPE;
-  v_today TEXT := to_char(CURRENT_TIMESTAMP + INTERVAL '8 hours', 'YYYY-MM-DD');
-  v_from_due TEXT;
-  v_to_due TEXT;
-  v_last_done TEXT;
+  v_today DATE := COALESCE(p_action_date, (now() AT TIME ZONE 'UTC' + INTERVAL '8 hours')::date);
+  v_from_due DATE;
+  v_to_due DATE;
+  v_last_done DATE;
 BEGIN
   SELECT * INTO v_habit FROM habits WHERE id = p_habit_id AND user_id = auth.uid();
   IF NOT FOUND THEN RAISE EXCEPTION 'NOT_FOUND'; END IF;
@@ -149,27 +150,23 @@ BEGIN
 
   CASE p_action
     WHEN 'push' THEN
-      v_to_due := to_char((to_date(v_today, 'YYYY-MM-DD') + 1)::date, 'YYYY-MM-DD');
+      v_to_due := v_today + 1;
     WHEN 'skip' THEN
       v_to_due := v_from_due;
       WHILE v_to_due < v_today LOOP
-        v_to_due := to_char((to_date(v_to_due, 'YYYY-MM-DD') + v_habit.interval_days)::date, 'YYYY-MM-DD');
+        v_to_due := v_to_due + v_habit.interval_days;
       END LOOP;
     WHEN 'done' THEN
       SELECT MAX(action_date) INTO v_last_done
       FROM habit_events
       WHERE habit_id = p_habit_id AND action = 'done';
-      v_to_due := to_char(
-        (GREATEST(COALESCE(to_date(v_last_done, 'YYYY-MM-DD'), to_date(v_today, 'YYYY-MM-DD')),
-                  to_date(v_today, 'YYYY-MM-DD'))
-         + GREATEST(v_habit.interval_days, 1))::date,
-        'YYYY-MM-DD'
-      );
+      v_to_due := GREATEST(COALESCE(v_last_done, v_today), v_today)
+                  + GREATEST(v_habit.interval_days, 1);
   END CASE;
 
   -- Delete existing event for today and insert new
   DELETE FROM habit_events
-  WHERE habit_id = p_habit_id AND action_date = v_today;
+  WHERE habit_id = p_habit_id AND action_date = v_today AND user_id = auth.uid();
 
   INSERT INTO habit_events (user_id, habit_id, action, action_date, from_due_date, to_due_date)
   VALUES (auth.uid(), p_habit_id, p_action, v_today, v_from_due, v_to_due);
@@ -183,10 +180,10 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- RPC: get_stats_summary
-CREATE OR REPLACE FUNCTION get_stats_summary()
+CREATE OR REPLACE FUNCTION get_stats_summary(p_today DATE DEFAULT NULL)
 RETURNS JSON AS $$
 DECLARE
-  v_today TEXT := to_char(CURRENT_TIMESTAMP + INTERVAL '8 hours', 'YYYY-MM-DD');
+  v_today DATE := COALESCE(p_today, (now() AT TIME ZONE 'UTC' + INTERVAL '8 hours')::date);
   v_result JSON;
 BEGIN
   SELECT json_build_object(

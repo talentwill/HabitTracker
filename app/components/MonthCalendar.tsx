@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import type { HabitEvent } from "../lib/api";
-import { nowInCST } from "../lib/date";
+import { nowInLocal } from "../lib/date";
 
 type CellStatus = "done" | "push" | "skip" | "overdue" | "future" | "empty" | "nextDue";
 
@@ -49,7 +49,7 @@ export default function MonthCalendar(props: {
   onReset?: () => void;
   onDateClick?: (date: string, event?: HabitEvent) => void;
 }) {
-  const todayStr = toYmd(nowInCST());
+  const todayStr = toYmd(nowInLocal());
 
   // 判断当前月份是否可以往前翻
   const canGoPrev =
@@ -88,7 +88,7 @@ export default function MonthCalendar(props: {
 
     for (let d = 1; d <= daysInMonth; d++) {
       const date = toYmd(new Date(props.year, props.month, d));
-      const isFuture = new Date(props.year, props.month, d) > nowInCST();
+      const isFuture = new Date(props.year, props.month, d) > nowInLocal();
       const beforeStart = props.startDate ? date < props.startDate : false;
 
       if (isFuture) {

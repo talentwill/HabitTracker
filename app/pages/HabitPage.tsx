@@ -10,7 +10,7 @@ import MonthCalendar from "../components/MonthCalendar";
 import * as api from "../lib/api";
 import type { Habit, HabitEvent } from "../lib/api";
 import { getApiErrorMessage } from "../lib/errorHelpers";
-import { compareDateOnly, diffDays, nowInCST, statusForDue, todayDateOnly } from "../lib/date";
+import { compareDateOnly, diffDays, nowInLocal, statusForDue, todayDateOnly } from "../lib/date";
 
 type HabitDraft = {
   title: string;
@@ -43,8 +43,8 @@ export default function HabitPage() {
   const [draft, setDraft] = useState<HabitDraft | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
 
-  const [calYear, setCalYear] = useState(nowInCST().getFullYear());
-  const [calMonth, setCalMonth] = useState(nowInCST().getMonth());
+  const [calYear, setCalYear] = useState(nowInLocal().getFullYear());
+  const [calMonth, setCalMonth] = useState(nowInLocal().getMonth());
   const [confirmDeleteEvent, setConfirmDeleteEvent] = useState<HabitEvent | null>(null);
   const [confirmManualDone, setConfirmManualDone] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -386,7 +386,7 @@ export default function HabitPage() {
                 year={calYear}
                 month={calMonth}
                 onReset={() => {
-                  const now = nowInCST();
+                  const now = nowInLocal();
                   setCalYear(now.getFullYear());
                   setCalMonth(now.getMonth());
                 }}

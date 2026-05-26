@@ -2,17 +2,13 @@ function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-// 固定使用中国时区 UTC+8，不受操作系统时区影响
-const TZ_OFFSET_HOURS = 8;
-
-export function nowInCST(): Date {
-  const now = new Date();
-  const utcMs = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
-  return new Date(utcMs + TZ_OFFSET_HOURS * 60 * 60 * 1000);
+// 使用浏览器本地时区，支持全球任意地点打卡
+export function nowInLocal(): Date {
+  return new Date();
 }
 
 export function todayDateOnly(): string {
-  const d = nowInCST();
+  const d = nowInLocal();
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 

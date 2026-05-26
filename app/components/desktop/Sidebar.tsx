@@ -6,7 +6,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { useTodayFilter } from "../../contexts/TodayFilterContext";
 import * as api from "../../lib/api";
 import type { Habit } from "../../lib/api";
-import { nowInCST, statusForDue, todayDateOnly } from "../../lib/date";
+import { nowInLocal, statusForDue, todayDateOnly } from "../../lib/date";
 import { tagColor } from "../TagInput";
 import TagManager from "../TagManager";
 
@@ -89,10 +89,10 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
   const navigate = useNavigate();
   const [tags, setTags] = useState<{ id: string; name: string; habit_count: number }[]>([]);
   const [managerOpen, setManagerOpen] = useState(false);
-  const [clock, setClock] = useState(() => formatClock(nowInCST()));
+  const [clock, setClock] = useState(() => formatClock(nowInLocal()));
 
   useEffect(() => {
-    const id = setInterval(() => setClock(formatClock(nowInCST())), 1000);
+    const id = setInterval(() => setClock(formatClock(nowInLocal())), 1000);
     return () => clearInterval(id);
   }, []);
 
