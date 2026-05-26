@@ -2,15 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import * as api from "../lib/api";
 import type { Habit, HabitEvent } from "../lib/api";
-import { diffDays, nowInCST, todayDateOnly } from "../lib/date";
+import { diffDays, nowInLocal, todayDateOnly } from "../lib/date";
 
 export function useHabitDetail(habitId: string | null, refreshKey?: number, onDone?: () => void) {
   const [habit, setHabit] = useState<Habit | null>(null);
   const [events, setEvents] = useState<HabitEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [calYear, setCalYear] = useState(nowInCST().getFullYear());
-  const [calMonth, setCalMonth] = useState(nowInCST().getMonth());
+  const [calYear, setCalYear] = useState(nowInLocal().getFullYear());
+  const [calMonth, setCalMonth] = useState(nowInLocal().getMonth());
   const [confirmDeleteEvent, setConfirmDeleteEvent] = useState<HabitEvent | null>(null);
 
   const today = todayDateOnly();
@@ -152,7 +152,7 @@ export function useHabitDetail(habitId: string | null, refreshKey?: number, onDo
   }
 
   function resetMonth() {
-    const now = nowInCST();
+    const now = nowInLocal();
     setCalYear(now.getFullYear());
     setCalMonth(now.getMonth());
   }

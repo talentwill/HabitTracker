@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { HabitEvent } from "../lib/api";
-import { nowInCST } from "../lib/date";
+import { nowInLocal } from "../lib/date";
 
 type DayData = {
   date: string;
@@ -84,7 +84,7 @@ export default function Heatmap(props: {
   );
 
   const weeks = useMemo(() => {
-    const now = nowInCST();
+    const now = nowInLocal();
     const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - 364);
