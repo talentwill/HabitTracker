@@ -194,6 +194,10 @@ html.dark {
   --shadow-card:
     rgba(0, 0, 0, 0.2) 0px 4px 18px, rgba(0, 0, 0, 0.12) 0px 2px 7px,
     rgba(0, 0, 0, 0.08) 0px 0.5px 2px;
+  --color-accent: #c5a3e3;
+  --color-accent-hover: #b39ddb;
+  --color-accent-focus: #9c7cb8;
+  --color-bad: #ef9a9a;
   --shadow-deep:
     rgba(0, 0, 0, 0.1) 0px 1px 3px, rgba(0, 0, 0, 0.15) 0px 3px 7px,
     rgba(0, 0, 0, 0.15) 0px 7px 15px, rgba(0, 0, 0, 0.2) 0px 14px 28px,
@@ -201,13 +205,13 @@ html.dark {
 }
 
 html.dark body {
-  color: #e8ddd0;
-  background: #1f1b18;
+  color: var(--color-ink);
+  background: var(--color-warm-white);
 }
 
 html.dark .input {
-  background: #2a2520;
-  border-color: rgba(200, 180, 160, 0.12);
+  background: var(--color-paper);
+  border-color: var(--color-line);
 }
 
 html.dark .input::placeholder {
@@ -220,4 +224,11 @@ html.dark a {
 
 html.dark ::selection {
   background: rgba(197, 163, 227, 0.35);
+}
+
+html.dark .btn {
+  background: rgba(197, 163, 227, 0.2);
+}
+html.dark .btn:hover {
+  background: rgba(197, 163, 227, 0.32);
 }
