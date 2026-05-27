@@ -148,7 +148,7 @@ export default function MorePage() {
       </div>
 
       {/* 主题设置 */}
-      <div className="rounded-lg border border-line bg-paper overflow-hidden mb-3">
+      <div className="rounded-lg border border-line bg-paper overflow-hidden mb-3 sm:hidden">
         <button
           type="button"
           className="w-full flex items-center justify-between px-4 py-3 text-[16px] font-medium text-ink"
