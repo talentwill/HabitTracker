@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-ink: #4a4458;
   --color-paper: #ffffff;
@@ -180,4 +182,64 @@ a:hover {
   .btn {
     font-size: 15px;
   }
+}
+
+html.dark {
+  --color-ink: #e8ddd0;
+  --color-paper: #2a2520;
+  --color-warm-white: #1f1b18;
+  --color-muted: #8a7e72;
+  --color-muted-light: #6a5f55;
+  --color-line: rgba(200, 180, 160, 0.12);
+  --color-badge-bg: #3a3228;
+  --color-badge-text: #c5a3e3;
+  --shadow-card:
+    rgba(0, 0, 0, 0.2) 0px 4px 18px, rgba(0, 0, 0, 0.12) 0px 2px 7px,
+    rgba(0, 0, 0, 0.08) 0px 0.5px 2px;
+  --color-accent: #c5a3e3;
+  --color-accent-hover: #b39ddb;
+  --color-accent-focus: #9c7cb8;
+  --color-bad: #ef9a9a;
+  --shadow-deep:
+    rgba(0, 0, 0, 0.1) 0px 1px 3px, rgba(0, 0, 0, 0.15) 0px 3px 7px,
+    rgba(0, 0, 0, 0.15) 0px 7px 15px, rgba(0, 0, 0, 0.2) 0px 14px 28px,
+    rgba(0, 0, 0, 0.25) 0px 23px 52px;
+}
+
+html.dark body {
+  color: var(--color-ink);
+  background: var(--color-warm-white);
+}
+
+html.dark .input {
+  background: var(--color-paper);
+  border-color: var(--color-line);
+}
+
+html.dark .input::placeholder {
+  color: var(--color-muted-light);
+}
+
+html.dark a {
+  color: var(--color-accent);
+}
+
+html.dark ::selection {
+  background: rgba(197, 163, 227, 0.35);
+}
+
+html.dark .btn {
+  background: rgba(197, 163, 227, 0.2);
+}
+html.dark .btn:hover {
+  background: rgba(197, 163, 227, 0.32);
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(200, 180, 160, 0.2);
+  border-radius: 4px;
 }

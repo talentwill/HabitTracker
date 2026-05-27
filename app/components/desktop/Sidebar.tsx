@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 
 import { useAuth } from "../../auth/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
 import { useTodayFilter } from "../../contexts/TodayFilterContext";
 import * as api from "../../lib/api";
 import type { Habit } from "../../lib/api";
@@ -85,6 +86,7 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, toggle }: SidebarProps) {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [tags, setTags] = useState<{ id: string; name: string; habit_count: number }[]>([]);
@@ -261,8 +263,24 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
         />
       </nav>
 
-      <div className={clsx("pb-2", collapsed ? "px-1" : "px-2")}>
+      <div className={clsx("pb-2", collapsed ? "px-1 flex flex-col items-center gap-1" : "px-2")}>
         {!collapsed && <div className="label mb-1 px-2">更多</div>}
+        <button
+          type="button"
+          className={clsx(
+            "flex items-center rounded-lg transition",
+            collapsed
+              ? "justify-center w-10 h-9 hover:bg-warm-white"
+              : "w-full gap-2 px-3 py-[7px] text-[14px] font-medium text-muted hover:text-ink hover:bg-warm-white"
+          )}
+          onClick={toggleTheme}
+          title={theme === "dark" ? "切换浅色模式" : "切换深色模式"}
+        >
+          <span className={collapsed ? "text-[18px]" : "text-[15px]"}>
+            {theme === "dark" ? "☀️" : "🌙"}
+          </span>
+          {!collapsed && (theme === "dark" ? "浅色模式" : "深色模式")}
+        </button>
         <SidebarLink
           to="/more"
           icon="⚙️"

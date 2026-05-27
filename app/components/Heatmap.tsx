@@ -205,7 +205,7 @@ export default function Heatmap(props: {
           type="button"
           className={`shrink-0 flex items-center justify-center w-5 h-10 rounded-md border text-ink/60 hover:text-ink/90 transition-all select-none ${
             canScrollLeft
-              ? "bg-white/80 hover:bg-white shadow-sm border-transparent opacity-100"
+              ? "bg-white/80 hover:bg-white dark:bg-[rgba(58,50,40,0.9)] dark:hover:bg-[rgba(74,66,56,0.9)] shadow-sm border-transparent opacity-100"
               : "opacity-0 pointer-events-none border-transparent"
           }`}
           onPointerDown={() => startScroll("left")}
@@ -256,7 +256,7 @@ export default function Heatmap(props: {
           type="button"
           className={`shrink-0 flex items-center justify-center w-5 h-10 rounded-md border text-ink/60 hover:text-ink/90 transition-all select-none ${
             canScrollRight
-              ? "bg-white/80 hover:bg-white shadow-sm border-transparent opacity-100"
+              ? "bg-white/80 hover:bg-white dark:bg-[rgba(58,50,40,0.9)] dark:hover:bg-[rgba(74,66,56,0.9)] shadow-sm border-transparent opacity-100"
               : "opacity-0 pointer-events-none border-transparent"
           }`}
           onPointerDown={() => startScroll("right")}

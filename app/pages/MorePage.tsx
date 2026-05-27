@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { useAuth } from "../auth/AuthContext";
 import TagManager from "../components/TagManager";
+import { useTheme } from "../contexts/ThemeContext";
 import * as api from "../lib/api";
 
 export default function MorePage() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [tags, setTags] = useState<{ id: string; name: string; habit_count: number }[]>([]);
   const [managerOpen, setManagerOpen] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -141,6 +143,18 @@ export default function MorePage() {
           disabled={importing}
         >
           <span>{importing ? "导入中..." : "📥 导入习惯数据"}</span>
+          <span className="text-muted-light">›</span>
+        </button>
+      </div>
+
+      {/* 主题设置 */}
+      <div className="rounded-lg border border-line bg-paper overflow-hidden mb-3 sm:hidden">
+        <button
+          type="button"
+          className="w-full flex items-center justify-between px-4 py-3 text-[16px] font-medium text-ink"
+          onClick={toggleTheme}
+        >
+          <span>{theme === "dark" ? "☀️ 浅色模式" : "🌙 深色模式"}</span>
           <span className="text-muted-light">›</span>
         </button>
       </div>
