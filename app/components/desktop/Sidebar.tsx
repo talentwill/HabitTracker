@@ -268,10 +268,10 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
         <button
           type="button"
           className={clsx(
-            "flex items-center rounded-lg transition w-full",
+            "flex items-center rounded-lg transition",
             collapsed
               ? "justify-center w-10 h-9 hover:bg-warm-white"
-              : "gap-2 px-3 py-[7px] text-[14px] font-medium text-muted hover:text-ink hover:bg-warm-white"
+              : "w-full gap-2 px-3 py-[7px] text-[14px] font-medium text-muted hover:text-ink hover:bg-warm-white"
           )}
           onClick={toggleTheme}
           title={theme === "dark" ? "切换浅色模式" : "切换深色模式"}
