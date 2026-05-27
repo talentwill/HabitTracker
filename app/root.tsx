@@ -9,6 +9,7 @@ import {
   Navigate,
 } from "react-router";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -30,13 +31,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(function(){var t=localStorage.getItem("theme");if(t==="dark")document.documentElement.classList.add("dark")})();',
+          }}
+        />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
