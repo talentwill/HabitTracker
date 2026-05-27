@@ -56,7 +56,7 @@ export default function TodayOverview() {
   const [viewMode, setViewMode] = useState<"list" | "card">(
     () => (localStorage.getItem("viewMode") as "list" | "card") || "card"
   );
-  const [filterTab, setFilterTab] = useState<FilterTab>("all");
+  const [filterTab, setFilterTab] = useState<FilterTab>("todo");
   const [selectedHabitId, setSelectedHabitIdRaw] = useState<string | null>(() =>
     typeof window !== "undefined" && window.innerWidth >= 640
       ? window.location.hash.slice(1) || null
