@@ -50,8 +50,8 @@ export default function HabitCard(props: {
       className={clsx(
         "rounded-lg border transition text-left cursor-pointer flex flex-col min-w-0 w-full",
         props.selected
-          ? "border-[#7e57c2] bg-[#faf5ff]"
-          : "border-[rgba(180,160,200,0.15)] bg-white hover:border-[#7e57c2]/30"
+          ? "border-[#7e57c2] bg-[#faf5ff] dark:border-[#c5a3e3] dark:bg-[rgba(58,50,40,0.85)]"
+          : "border-[rgba(180,160,200,0.15)] bg-white hover:border-[#7e57c2]/30 dark:border-[rgba(200,180,160,0.12)] dark:bg-[rgba(42,37,32,0.8)] dark:hover:border-[#c5a3e3]/30"
       )}
       onClick={() => props.onSelect?.()}
       onKeyDown={(e) => {
@@ -63,7 +63,9 @@ export default function HabitCard(props: {
         <span
           className={clsx(
             "w-8 h-8 rounded-full flex items-center justify-center text-[14px] sm:text-[13px] font-bold shrink-0",
-            doneToday ? "bg-[#e8f5e9] text-[#43a047]" : "bg-[#ede7f6] text-[#7e57c2]"
+            doneToday
+              ? "bg-[#e8f5e9] text-[#43a047] dark:bg-[rgba(45,74,46,0.9)] dark:text-[#66bb6a]"
+              : "bg-[#ede7f6] text-[#7e57c2] dark:bg-[rgba(58,50,40,0.9)] dark:text-[#c5a3e3]"
           )}
         >
           {h.icon || firstChar}
@@ -72,14 +74,14 @@ export default function HabitCard(props: {
         <div className="min-w-0 flex-1 flex items-center justify-between gap-2">
           <span
             className={clsx(
-              "text-[17px] sm:text-[15px] font-semibold leading-tight truncate",
+              "text-[17px] sm:text-[15px] font-semibold leading-tight truncate dark:text-[#e8ddd0]",
               doneToday && "line-through opacity-50"
             )}
           >
             {h.title}
           </span>
           {h.tag ? (
-            <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[12px] sm:text-[9px] font-semibold shrink-0 bg-[#e8f5e9] text-[#2e7d32]">
+            <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[12px] sm:text-[9px] font-semibold shrink-0 bg-[#e8f5e9] text-[#2e7d32] dark:bg-[rgba(58,50,40,0.9)] dark:text-[#c5a3e3]">
               🏷 {h.tag}
             </span>
           ) : null}
@@ -87,14 +89,14 @@ export default function HabitCard(props: {
       </div>
 
       {/* Meta info row */}
-      <div className="flex items-center gap-2 px-3 pb-2 text-[13px] sm:text-[10px] text-gray-400">
-        <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 bg-[#ede7f6] text-[#7e57c2]">
+      <div className="flex items-center gap-2 px-3 pb-2 text-[13px] sm:text-[10px] text-gray-400 dark:text-[#8a7e72]">
+        <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 bg-[#ede7f6] text-[#7e57c2] dark:bg-[rgba(58,50,40,0.9)] dark:text-[#c5a3e3]">
           🔄 每{h.intervalDays}天
         </span>
         <span>
           {h.lastDoneDate ? `上次 ${daysAgoLabel(h.lastDoneDate, props.today)}` : "从未打卡"}
         </span>
-        <span className="text-gray-300">|</span>
+        <span className="text-gray-300 dark:text-[rgba(200,180,160,0.2)]">|</span>
         <span
           className={
             status === "overdue" ? "text-[#ef5350]" : status === "today" ? "text-[#f57c00]" : ""
@@ -109,7 +111,7 @@ export default function HabitCard(props: {
         {!doneToday && !disabled && props.onPush ? (
           <button
             type="button"
-            className="flex-1 py-1.5 sm:py-1 text-[13px] sm:text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition text-center"
+            className="flex-1 py-1.5 sm:py-1 text-[13px] sm:text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition text-center dark:text-[#8a7e72] dark:hover:text-[#e8ddd0] dark:bg-[rgba(58,50,40,0.9)] dark:hover:bg-[rgba(74,66,56,0.9)]"
             onClick={(e) => {
               e.stopPropagation();
               props.onPush?.();
@@ -121,7 +123,7 @@ export default function HabitCard(props: {
         {!doneToday && !disabled && props.onSkip ? (
           <button
             type="button"
-            className="flex-1 py-1.5 sm:py-1 text-[13px] sm:text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition text-center"
+            className="flex-1 py-1.5 sm:py-1 text-[13px] sm:text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition text-center dark:text-[#8a7e72] dark:hover:text-[#e8ddd0] dark:bg-[rgba(58,50,40,0.9)] dark:hover:bg-[rgba(74,66,56,0.9)]"
             onClick={(e) => {
               e.stopPropagation();
               props.onSkip?.();
@@ -135,10 +137,10 @@ export default function HabitCard(props: {
           className={clsx(
             "py-1.5 sm:py-1 text-[13px] sm:text-[11px] font-semibold rounded-full transition text-center",
             doneToday
-              ? "px-3 text-[#7e57c2] bg-[#ede7f6] hover:bg-[#d1c4e9] ml-auto"
+              ? "px-3 text-[#7e57c2] bg-[#ede7f6] hover:bg-[#d1c4e9] ml-auto dark:text-[#c5a3e3] dark:bg-[rgba(58,50,40,0.9)] dark:hover:bg-[rgba(74,66,56,0.9)]"
               : disabled
-                ? "flex-1 text-gray-300 bg-gray-50"
-                : "flex-1 text-[#43a047] bg-[#e8f5e9] hover:bg-[#c8e6c9]"
+                ? "flex-1 text-gray-300 bg-gray-50 dark:text-[rgba(200,180,160,0.3)] dark:bg-[rgba(58,50,40,0.5)]"
+                : "flex-1 text-[#43a047] bg-[#e8f5e9] hover:bg-[#c8e6c9] dark:text-[#66bb6a] dark:bg-[rgba(45,74,46,0.9)] dark:hover:bg-[rgba(58,90,58,0.9)]"
           )}
           onClick={(e) => {
             e.stopPropagation();
