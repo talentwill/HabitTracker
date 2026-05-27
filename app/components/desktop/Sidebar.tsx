@@ -263,7 +263,7 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
         />
       </nav>
 
-      <div className={clsx("pb-2", collapsed ? "px-1" : "px-2")}>
+      <div className={clsx("pb-2", collapsed ? "px-1 flex flex-col items-center gap-1" : "px-2")}>
         {!collapsed && <div className="label mb-1 px-2">更多</div>}
         <button
           type="button"
