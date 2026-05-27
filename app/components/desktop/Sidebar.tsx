@@ -270,7 +270,7 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
           className={clsx(
             "flex items-center rounded-lg transition w-full",
             collapsed
-              ? "justify-center w-10 h-9"
+              ? "justify-center w-10 h-9 hover:bg-warm-white"
               : "gap-2 px-3 py-[7px] text-[14px] font-medium text-muted hover:text-ink hover:bg-warm-white"
           )}
           onClick={toggleTheme}
