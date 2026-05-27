@@ -263,7 +263,8 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
         />
       </nav>
 
-      <div className={clsx("pb-1", collapsed ? "px-1" : "px-2")}>
+      <div className={clsx("pb-2", collapsed ? "px-1" : "px-2")}>
+        {!collapsed && <div className="label mb-1 px-2">更多</div>}
         <button
           type="button"
           className={clsx(
@@ -280,10 +281,6 @@ export default function Sidebar({ collapsed, toggle }: SidebarProps) {
           </span>
           {!collapsed && (theme === "dark" ? "浅色模式" : "深色模式")}
         </button>
-      </div>
-
-      <div className={clsx("pb-2", collapsed ? "px-1" : "px-2")}>
-        {!collapsed && <div className="label mb-1 px-2">更多</div>}
         <SidebarLink
           to="/more"
           icon="⚙️"
