@@ -1,9 +1,9 @@
-# Dark Mode Habit Card Styling
+# Dark Mode UI Fixes
 
 **Date:** 2026-05-27
 **Status:** Approved
 
-## Problem
+## Problem 1: Habit Cards
 
 HabitCard.tsx uses hardcoded Tailwind color classes (`bg-white`, `bg-[#faf5ff]`, `bg-gray-100`, etc.) that don't respond to the dark mode CSS variable overrides defined in `app.css`. After enabling dark mode, habit cards remain white against the dark background.
 
@@ -15,7 +15,11 @@ Alternatives considered:
 - Solid dark cards (`#2a2520`) — unified but flat
 - Slightly lighter dark cards (`#3a3530`) — more contrast but less cohesive
 
-## Solution
+## Problem 2: Scrollbar
+
+TodayOverview has two scrollable containers (`overflow-y-auto`) with no custom scrollbar styling. In dark mode, the browser's default light scrollbar (white track, gray thumb) clashes with the dark background.
+
+## Solution 1: Habit Cards
 
 Add Tailwind `dark:` variant classes to HabitCard.tsx. No CSS file changes, no new components.
 
@@ -39,10 +43,52 @@ Add Tailwind `dark:` variant classes to HabitCard.tsx. No CSS file changes, no n
 | Button text (done) | `text-[#43a047]` | `dark:text-[#66bb6a]` |
 | Button text (cancel) | `text-[#7e57c2]` | `dark:text-[#c5a3e3]` |
 
+## Problem 3: Sidebar Bottom Layout
+
+The sidebar bottom has the dark mode toggle and "更多" (More) as two separate sections. They should be merged into one "更多" section with the theme toggle as an item inside it.
+
+## Solution 2: Scrollbar
+
+Add dark mode scrollbar styles to `app.css` under `html.dark`:
+
+```css
+html.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(200, 180, 160, 0.2);
+  border-radius: 4px;
+}
+```
+
+This applies globally to all scrollable containers in dark mode — no per-component changes needed.
+
+## Solution 3: Sidebar Bottom Layout
+
+Merge the dark mode toggle into the "更多" section. Current structure:
+
+```
+[Dark mode toggle]  ← separate div
+[更多]
+  └ 更多 link
+[User profile]
+```
+
+New structure:
+
+```
+[更多]
+  ├ 深色/浅色模式 toggle
+  └ 更多 link
+[User profile]
+```
+
+The toggle button becomes a `<SidebarLink>`-style item inside the "更多" nav section, keeping consistent styling with other sidebar items.
+
 ### Scope
 
-- **File changed:** `app/components/HabitCard.tsx` only
-- **No changes to:** `app.css`, ThemeContext, or any other component
+- **Files changed:** `app/components/HabitCard.tsx`, `app/app.css`, `app/components/desktop/Sidebar.tsx`
+- **No changes to:** ThemeContext, TodayOverview, or any other component
 
 ### Notes
 
