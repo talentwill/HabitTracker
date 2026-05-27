@@ -515,22 +515,22 @@ export default function TodayOverview() {
                         <button
                           key={h.id}
                           type="button"
-                          className={`w-full text-left rounded-lg px-3 py-2 transition flex items-center gap-2 ${selectedHabitId === h.id ? "bg-[#ede7f6]" : "hover:bg-gray-50"}`}
+                          className={`w-full text-left rounded-lg px-3 py-2 transition flex items-center gap-2 ${selectedHabitId === h.id ? "bg-[#ede7f6] dark:bg-[rgba(58,50,40,0.85)]" : "hover:bg-gray-50 dark:hover:bg-[rgba(58,50,40,0.5)]"}`}
                           onClick={() => setSelectedHabitId(h.id)}
                         >
                           <span
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[13px] sm:text-[11px] font-bold shrink-0 ${h.lastDoneDate === today ? "bg-[#e8f5e9] text-[#43a047]" : "bg-[#ede7f6] text-[#7e57c2]"}`}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[13px] sm:text-[11px] font-bold shrink-0 ${h.lastDoneDate === today ? "bg-[#e8f5e9] text-[#43a047] dark:bg-[rgba(45,74,46,0.9)] dark:text-[#66bb6a]" : "bg-[#ede7f6] text-[#7e57c2] dark:bg-[rgba(58,50,40,0.9)] dark:text-[#c5a3e3]"}`}
                           >
                             {h.icon || getFirstTextChar(h.title)}
                           </span>
                           <span
-                            className={`text-[16px] sm:text-[12px] font-medium truncate flex-1 ${h.lastDoneDate === today ? "line-through opacity-50" : ""}`}
+                            className={`text-[16px] sm:text-[12px] font-medium truncate flex-1 dark:text-[#e8ddd0] ${h.lastDoneDate === today ? "line-through opacity-50" : ""}`}
                           >
                             {h.title}
                           </span>
                           <button
                             type="button"
-                            className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${h.lastDoneDate === today ? "bg-[#7e57c2] text-white" : "border border-gray-200"}`}
+                            className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${h.lastDoneDate === today ? "bg-[#7e57c2] text-white" : "border border-gray-200 dark:border-[rgba(200,180,160,0.2)]"}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               if (busy !== h.id) void act(h.id, "done");
