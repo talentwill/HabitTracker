@@ -234,3 +234,12 @@ html.dark .btn {
 html.dark .btn:hover {
   background: rgba(197, 163, 227, 0.32);
 }
+
+html.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(200, 180, 160, 0.2);
+  border-radius: 4px;
+}
