@@ -215,11 +215,11 @@ html.dark .input {
 }
 
 html.dark .input::placeholder {
-  color: #6a5f55;
+  color: var(--color-muted-light);
 }
 
 html.dark a {
-  color: #c5a3e3;
+  color: var(--color-accent);
 }
 
 html.dark ::selection {
