@@ -23,7 +23,7 @@ Add Tailwind `dark:` variant classes to HabitCard.tsx. No CSS file changes, no n
 
 | Element | Light | Dark |
 |---------|-------|------|
-| Card background | `bg-white` | `dark:bg-[rgba(42,37,32,0.8)]` |
+| Card background | `bg-white` | `dark:bg-[rgba(42,37,32,0.8)] dark:backdrop-blur-sm` |
 | Card border | existing | `dark:border-[rgba(200,180,160,0.12)]` |
 | Selected bg | `bg-[#faf5ff]` | `dark:bg-[rgba(58,50,40,0.85)]` |
 | Avatar (not done) | `bg-[#ede7f6] text-[#7e57c2]` | `dark:bg-[rgba(58,50,40,0.9)] dark:text-[#c5a3e3]` |
