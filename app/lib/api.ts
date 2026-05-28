@@ -843,6 +843,20 @@ export async function importHabits(
   return { imported: { habits: habitIds.size, events: eventCount } };
 }
 
+// --- Auth Helper ---
+
+async function requireAuth(): Promise<User> {
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
+  return {
+    id: authUser.id,
+    email: authUser.email ?? "",
+    name: null,
+  };
+}
+
 // --- Notification Settings ---
 
 export type NotificationSettings = {
@@ -865,10 +879,7 @@ export type NotificationSettings = {
 };
 
 export async function getNotificationSettings(): Promise<NotificationSettings> {
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-  if (!authUser) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
+  const authUser = await requireAuth();
 
   const { data, error } = await supabase
     .from("profiles")
@@ -883,10 +894,7 @@ export async function getNotificationSettings(): Promise<NotificationSettings> {
 export async function updateNotificationSettings(
   settings: NotificationSettings
 ): Promise<{ ok: boolean }> {
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-  if (!authUser) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
+  const authUser = await requireAuth();
 
   const { error } = await supabase
     .from("profiles")
@@ -901,26 +909,12 @@ export async function updateNotificationSettings(
 }
 
 export async function sendTestNotification(webhookUrl: string): Promise<{ success: boolean }> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
+  const { data, error } = await supabase.functions.invoke("test-notification", {
+    body: { webhook_url: webhookUrl },
+  });
 
-  const response = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/test-notification`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ webhook_url: webhookUrl }),
-    }
-  );
-
-  const result = await response.json();
-  if (!response.ok) {
-    throw new ApiError({ status: response.status, code: result.error || "TEST_FAILED" });
+  if (error) {
+    throw new ApiError({ status: 500, code: data?.error || error.message || "TEST_FAILED" });
   }
   return { success: true };
 }

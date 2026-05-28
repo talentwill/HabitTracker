@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+type NotificationType = "daily" | "weekly" | "monthly";
+
 interface NotificationSettings {
   feishu_webhook?: string;
   daily_reminder?: {
@@ -25,13 +27,16 @@ interface NotificationSettings {
   };
 }
 
+function isValidFeishuWebhook(url: string): boolean {
+  return url.startsWith("https://open.feishu.cn/open-apis/bot/v2/hook/");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // 使用 service_role key 查询所有用户
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -40,15 +45,10 @@ serve(async (req) => {
     // 获取当前 UTC+8 时间
     const now = new Date();
     const utc8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-    const currentHour = utc8.getUTCHours().toString().padStart(2, "0");
-    const currentMinute = utc8.getUTCMinutes().toString().padStart(2, "0");
-    const currentTime = `${currentHour}:${currentMinute}`;
-    const currentDayOfWeek = utc8.getUTCDay(); // 0=Sunday
+    const currentTime = `${utc8.getUTCHours().toString().padStart(2, "0")}:${utc8.getUTCMinutes().toString().padStart(2, "0")}`;
+    const currentDayOfWeek = utc8.getUTCDay();
     const currentDayOfMonth = utc8.getUTCDate();
-
-    console.log(
-      `Current time (UTC+8): ${currentTime}, Day of week: ${currentDayOfWeek}, Day of month: ${currentDayOfMonth}`
-    );
+    const today = utc8.toISOString().split("T")[0];
 
     // 查询所有有通知配置的用户
     const { data: profiles, error: profilesError } = await supabaseAdmin
@@ -66,65 +66,123 @@ serve(async (req) => {
       });
     }
 
-    const results = [];
+    // 确定需要发送的通知类型
+    const userNotifications: Array<{
+      userId: string;
+      webhookUrl: string;
+      types: NotificationType[];
+    }> = [];
 
     for (const profile of profiles) {
       const settings = profile.notification_settings as NotificationSettings;
 
-      if (!settings.feishu_webhook) continue;
+      if (!settings.feishu_webhook || !isValidFeishuWebhook(settings.feishu_webhook)) continue;
 
-      const notificationsToSend = [];
+      const types: NotificationType[] = [];
 
-      // 检查每日提醒
       if (
         settings.daily_reminder?.enabled &&
         settings.daily_reminder.time &&
-        currentTime.startsWith(settings.daily_reminder.time.substring(0, 2))
+        currentTime === settings.daily_reminder.time.substring(0, 5)
       ) {
-        notificationsToSend.push("daily");
+        types.push("daily");
       }
 
-      // 检查每周报告（周一 = 1）
       if (
         settings.weekly_report?.enabled &&
         currentDayOfWeek === 1 &&
         settings.weekly_report.time &&
-        currentTime.startsWith(settings.weekly_report.time.substring(0, 2))
+        currentTime === settings.weekly_report.time.substring(0, 5)
       ) {
-        notificationsToSend.push("weekly");
+        types.push("weekly");
       }
 
-      // 检查每月报告
       if (
         settings.monthly_report?.enabled &&
         currentDayOfMonth === (settings.monthly_report.day || 1) &&
         settings.monthly_report.time &&
-        currentTime.startsWith(settings.monthly_report.time.substring(0, 2))
+        currentTime === settings.monthly_report.time.substring(0, 5)
       ) {
-        notificationsToSend.push("monthly");
+        types.push("monthly");
       }
 
-      if (notificationsToSend.length === 0) continue;
+      if (types.length > 0) {
+        userNotifications.push({
+          userId: profile.id,
+          webhookUrl: settings.feishu_webhook,
+          types,
+        });
+      }
+    }
 
-      // 获取用户的习惯数据
-      const { data: habits, error: habitsError } = await supabaseAdmin
-        .from("habits")
-        .select("id, title, icon, next_due_date, archived")
-        .eq("user_id", profile.id)
-        .eq("archived", false);
+    if (userNotifications.length === 0) {
+      return new Response(JSON.stringify({ message: "No notifications to send" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-      if (habitsError || !habits || habits.length === 0) continue;
+    // 批量查询所有用户的习惯
+    const userIds = userNotifications.map((u) => u.userId);
+    const { data: allHabits } = await supabaseAdmin
+      .from("habits")
+      .select("user_id, id, title, icon, next_due_date, interval_days")
+      .in("user_id", userIds)
+      .eq("archived", false);
 
-      const today = utc8.toISOString().split("T")[0];
+    const habitsByUser = new Map<string, typeof allHabits>();
+    for (const h of allHabits ?? []) {
+      if (!habitsByUser.has(h.user_id)) habitsByUser.set(h.user_id, []);
+      habitsByUser.get(h.user_id)!.push(h);
+    }
 
-      for (const notificationType of notificationsToSend) {
+    // 批量查询所有用户的习惯事件（最近 30 天）
+    const startDate = new Date(utc8.getTime() - 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+    const { data: allEvents } = await supabaseAdmin
+      .from("habit_events")
+      .select("user_id, habit_id, action, action_date")
+      .in("user_id", userIds)
+      .gte("action_date", startDate)
+      .lte("action_date", today);
+
+    const eventsByUser = new Map<string, typeof allEvents>();
+    for (const e of allEvents ?? []) {
+      if (!eventsByUser.has(e.user_id)) eventsByUser.set(e.user_id, []);
+      eventsByUser.get(e.user_id)!.push(e);
+    }
+
+    // 构建所有待发送的通知任务
+    const tasks: Array<{
+      userId: string;
+      type: NotificationType;
+      webhookUrl: string;
+      card: Record<string, unknown>;
+    }> = [];
+
+    for (const { userId, webhookUrl, types } of userNotifications) {
+      const habits = habitsByUser.get(userId) ?? [];
+      if (habits.length === 0) continue;
+
+      const events = eventsByUser.get(userId) ?? [];
+
+      for (const type of types) {
         let card;
 
-        if (notificationType === "daily") {
-          const dueHabits = habits.filter((h) => h.next_due_date <= today);
-          const upcomingHabits = habits.filter((h) => h.next_due_date > today);
+        if (type === "daily") {
+          const [dueHabits, upcomingHabits] = habits.reduce<[typeof habits, typeof habits]>(
+            ([due, upcoming], h) => {
+              if (h.next_due_date <= today) {
+                due.push(h);
+              } else {
+                upcoming.push(h);
+              }
+              return [due, upcoming];
+            },
+            [[], []]
+          );
 
-          if (dueHabits.length === 0) continue; // 今日无待办，跳过
+          if (dueHabits.length === 0) continue;
 
           const dueList = dueHabits
             .map((h) => `${h.icon || "📌"} ${h.title}${h.next_due_date < today ? " ⚠️ 逾期" : ""}`)
@@ -170,36 +228,40 @@ serve(async (req) => {
             },
           };
         } else {
-          // weekly 或 monthly report
-          // 获取过去 7 天或 30 天的完成情况
-          const daysBack = notificationType === "weekly" ? 7 : 30;
-          const startDate = new Date(utc8.getTime() - daysBack * 24 * 60 * 60 * 1000)
+          const daysBack = type === "weekly" ? 7 : 30;
+          const reportStart = new Date(utc8.getTime() - daysBack * 24 * 60 * 60 * 1000)
             .toISOString()
             .split("T")[0];
 
-          const { data: events } = await supabaseAdmin
-            .from("habit_events")
-            .select("habit_id, action, action_date")
-            .eq("user_id", profile.id)
-            .gte("action_date", startDate)
-            .lte("action_date", today);
+          const periodEvents = events.filter(
+            (e) => e.action_date >= reportStart && e.action_date <= today
+          );
+          const doneEvents = periodEvents.filter((e) => e.action === "done");
+          const doneCount = doneEvents.length;
 
-          const totalDue = habits.length * daysBack;
-          const doneCount = events?.filter((e) => e.action === "done").length || 0;
-          const completionRate = totalDue > 0 ? Math.round((doneCount / totalDue) * 100) : 0;
+          // 计算期望完成次数（考虑 interval_days）
+          let expectedCount = 0;
+          for (const habit of habits) {
+            const interval = habit.interval_days || 1;
+            expectedCount += Math.ceil(daysBack / interval);
+          }
+          const completionRate =
+            expectedCount > 0 ? Math.round((doneCount / expectedCount) * 100) : 0;
 
           // 计算连续打卡天数
+          const doneDates = new Set(doneEvents.map((e) => e.action_date));
           let streak = 0;
-          const doneDates = new Set(
-            events?.filter((e) => e.action === "done").map((e) => e.action_date)
-          );
           let checkDate = new Date(utc8.getTime() - 24 * 60 * 60 * 1000);
-          while (doneDates.has(checkDate.toISOString().split("T")[0])) {
-            streak++;
-            checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000);
+          for (let i = 0; i < daysBack; i++) {
+            if (doneDates.has(checkDate.toISOString().split("T")[0])) {
+              streak++;
+              checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000);
+            } else {
+              break;
+            }
           }
 
-          const reportTitle = notificationType === "weekly" ? "📊 本周习惯报告" : "📊 本月习惯报告";
+          const reportTitle = type === "weekly" ? "📊 本周习惯报告" : "📊 本月习惯报告";
 
           card = {
             msg_type: "interactive",
@@ -236,7 +298,7 @@ serve(async (req) => {
                   elements: [
                     {
                       tag: "plain_text",
-                      content: `报告周期：${startDate} ~ ${today}`,
+                      content: `报告周期：${reportStart} ~ ${today}`,
                     },
                   ],
                 },
@@ -245,29 +307,51 @@ serve(async (req) => {
           };
         }
 
-        // 发送通知
-        try {
-          const response = await fetch(settings.feishu_webhook, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(card),
-          });
+        tasks.push({ userId, type, webhookUrl, card });
+      }
+    }
 
-          const result = await response.json();
-          results.push({
-            user_id: profile.id,
-            type: notificationType,
-            success: result.code === 0 || result.StatusCode === 0,
-            error: result.code !== 0 && result.StatusCode !== 0 ? result : null,
-          });
-        } catch (error) {
-          results.push({
-            user_id: profile.id,
-            type: notificationType,
-            success: false,
-            error: error.message,
-          });
-        }
+    // 并行发送 webhook（分批，每批 10 个）
+    const results = [];
+    const BATCH_SIZE = 10;
+
+    for (let i = 0; i < tasks.length; i += BATCH_SIZE) {
+      const batch = tasks.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.allSettled(
+        batch.map(async (task) => {
+          try {
+            const response = await fetch(task.webhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(task.card),
+            });
+
+            let result;
+            try {
+              result = await response.json();
+            } catch {
+              result = { code: -1, message: "Invalid JSON response" };
+            }
+
+            return {
+              user_id: task.userId,
+              type: task.type,
+              success: result.code === 0 || result.StatusCode === 0,
+              error: result.code !== 0 && result.StatusCode !== 0 ? result : null,
+            };
+          } catch (error) {
+            return {
+              user_id: task.userId,
+              type: task.type,
+              success: false,
+              error: error.message,
+            };
+          }
+        })
+      );
+
+      for (const r of batchResults) {
+        results.push(r.status === "fulfilled" ? r.value : r.reason);
       }
     }
 

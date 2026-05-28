@@ -40,7 +40,6 @@ export default function ProfilePage() {
 
   // 通知设置状态
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({});
-  const [notificationLoading, setNotificationLoading] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<
     "idle" | "saving" | "done" | "error"
   >("idle");
@@ -94,15 +93,12 @@ export default function ProfilePage() {
 
   async function handleSaveNotificationSettings() {
     setNotificationStatus("saving");
-    setNotificationLoading(true);
     try {
       await updateNotificationSettings(notificationSettings);
       setNotificationStatus("done");
       setTimeout(() => setNotificationStatus("idle"), 2000);
     } catch {
       setNotificationStatus("error");
-    } finally {
-      setNotificationLoading(false);
     }
   }
 
@@ -558,7 +554,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => void handleSaveNotificationSettings()}
-            disabled={notificationLoading}
+            disabled={notificationStatus === "saving"}
             className="btn btn-primary text-[12px] px-3.5 py-1.5"
           >
             {notificationStatus === "saving" ? "保存中..." : "保存通知设置"}
