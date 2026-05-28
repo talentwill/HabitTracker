@@ -136,7 +136,7 @@ export default function HabitRow(props: {
           doneToday && "opacity-40"
         )}
         style={{
-          background: "#ffffff",
+          background: "var(--color-paper)",
           borderColor: status === "overdue" && !doneToday ? "#f8bbd0" : undefined,
           borderLeftWidth: status === "overdue" && !doneToday ? "3px" : undefined,
           borderLeftColor: status === "overdue" && !doneToday ? "#f48fb1" : undefined,
@@ -151,7 +151,7 @@ export default function HabitRow(props: {
         >
           {doneToday && <span className="text-[9px] text-white">✓</span>}
         </div>
-        <div className="w-6 h-6 rounded-full bg-[#ede7f6] flex items-center justify-center text-[12px] shrink-0">
+        <div className="w-6 h-6 rounded-full bg-badge-bg flex items-center justify-center text-[12px] shrink-0">
           {h.icon || getFirstTextChar(h.title)}
         </div>
         <Link

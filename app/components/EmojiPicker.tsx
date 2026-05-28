@@ -25,18 +25,18 @@ export default function EmojiPicker(props: {
   return (
     <div
       ref={ref}
-      className="absolute z-50 top-full left-0 mt-1 bg-[#f7f4ed] border border-[#eceae4] rounded-xl shadow-sm p-3 w-[280px]"
+      className="absolute z-50 top-full left-0 mt-1 bg-[#f7f4ed] dark:bg-paper border border-[#eceae4] dark:border-line rounded-xl shadow-sm p-3 w-[280px]"
     >
       {/* Category tabs */}
-      <div className="flex gap-1 mb-2 border-b border-[#eceae4] pb-2 overflow-x-auto">
+      <div className="flex gap-1 mb-2 border-b border-[#eceae4] dark:border-line pb-2 overflow-x-auto">
         {EMOJI_CATEGORIES.map((cat, i) => (
           <button
             key={cat.name}
             type="button"
             className={`px-2 py-0.5 rounded-full text-[12px] whitespace-nowrap transition ${
               i === activeCategory
-                ? "bg-[#1c1c1c] text-[#fcfbf8]"
-                : "text-[#5f5f5d] hover:bg-[rgba(28,28,28,0.04)]"
+                ? "bg-[#1c1c1c] dark:bg-ink text-[#fcfbf8] dark:text-paper"
+                : "text-[#5f5f5d] dark:text-muted hover:bg-[rgba(28,28,28,0.04)] dark:hover:bg-ink/8"
             }`}
             onClick={() => setActiveCategory(i)}
           >
@@ -52,7 +52,9 @@ export default function EmojiPicker(props: {
             key={emoji}
             type="button"
             className={`w-8 h-8 flex items-center justify-center rounded-md text-[18px] transition ${
-              props.value === emoji ? "bg-[#ede7f6]" : "hover:bg-[rgba(28,28,28,0.04)]"
+              props.value === emoji
+                ? "bg-[#ede7f6] dark:bg-badge-bg"
+                : "hover:bg-[rgba(28,28,28,0.04)] dark:hover:bg-ink/8"
             }`}
             onClick={() => {
               props.onSelect(emoji);
@@ -66,10 +68,10 @@ export default function EmojiPicker(props: {
 
       {/* Clear button */}
       {props.value && (
-        <div className="mt-2 pt-2 border-t border-[#eceae4] flex justify-end">
+        <div className="mt-2 pt-2 border-t border-[#eceae4] dark:border-line flex justify-end">
           <button
             type="button"
-            className="text-[11px] text-[#7e57c2] hover:underline"
+            className="text-[11px] text-[#7e57c2] dark:text-accent hover:underline"
             onClick={() => {
               props.onClear();
               props.onClose();

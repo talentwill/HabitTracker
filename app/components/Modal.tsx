@@ -17,7 +17,7 @@ export default function Modal(props: {
         onClick={props.onClose}
         aria-label="Close"
       />
-      <div className="relative w-full sm:max-w-xl bg-white border border-line rounded-t-xl sm:rounded-xl px-5 py-5 sm:px-6 sm:py-6 max-h-[75vh] sm:max-h-[90vh] overflow-y-auto flex flex-col shadow-deep">
+      <div className="relative w-full sm:max-w-xl bg-paper border border-line rounded-t-xl sm:rounded-xl px-5 py-5 sm:px-6 sm:py-6 max-h-[75vh] sm:max-h-[90vh] overflow-y-auto flex flex-col shadow-deep">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/10 sm:hidden" />
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-[18px] font-bold tracking-[-0.25px] text-ink">{props.title}</h2>

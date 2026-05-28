@@ -23,7 +23,7 @@ export default function FilterTabs(props: { value: FilterTab; onChange: (v: Filt
             "flex-1 px-1 py-1.5 sm:py-1 text-[14px] sm:text-[12px] font-medium rounded-full transition whitespace-nowrap text-center",
             props.value === t.key
               ? "bg-[#7e57c2] text-white shadow-sm"
-              : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
+              : "text-gray-500 hover:text-gray-700 hover:bg-white/60 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/10"
           )}
           onClick={() => props.onChange(t.key)}
         >

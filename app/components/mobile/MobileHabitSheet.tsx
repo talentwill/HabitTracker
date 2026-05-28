@@ -78,7 +78,7 @@ export default function MobileHabitSheet(props: {
 
         <div
           ref={sheetRef}
-          className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-deep h-[92vh] flex flex-col transition-transform duration-200 ease-out ${
+          className={`fixed bottom-0 left-0 right-0 bg-paper rounded-t-2xl shadow-deep h-[92vh] flex flex-col transition-transform duration-200 ease-out ${
             visible ? "translate-y-0" : "translate-y-full"
           }`}
         >

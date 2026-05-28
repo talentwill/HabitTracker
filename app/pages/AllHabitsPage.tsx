@@ -234,17 +234,17 @@ export default function AllHabitsPage() {
       <div className="flex items-center justify-between mb-3">
         <h1 className="section-title">📑 全部习惯</h1>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-full bg-gray-100 p-0.5">
+          <div className="flex rounded-full bg-gray-100 dark:bg-gray-800 p-0.5">
             <button
               type="button"
-              className={`px-2.5 py-1 text-[14px] sm:text-[12px] font-medium rounded-full transition ${groupBy === "tag" ? "bg-white text-ink shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              className={`px-2.5 py-1 text-[14px] sm:text-[12px] font-medium rounded-full transition ${groupBy === "tag" ? "bg-paper text-ink shadow-sm" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
               onClick={() => setGroupBy("tag")}
             >
               按标签
             </button>
             <button
               type="button"
-              className={`px-2.5 py-1 text-[14px] sm:text-[12px] font-medium rounded-full transition ${groupBy === "interval" ? "bg-white text-ink shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              className={`px-2.5 py-1 text-[14px] sm:text-[12px] font-medium rounded-full transition ${groupBy === "interval" ? "bg-paper text-ink shadow-sm" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"}`}
               onClick={() => setGroupBy("interval")}
             >
               按间隔
