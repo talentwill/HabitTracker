@@ -842,3 +842,85 @@ export async function importHabits(
 
   return { imported: { habits: habitIds.size, events: eventCount } };
 }
+
+// --- Notification Settings ---
+
+export type NotificationSettings = {
+  feishu_webhook?: string;
+  daily_reminder?: {
+    enabled: boolean;
+    time: string;
+    timezone?: string;
+  };
+  weekly_report?: {
+    enabled: boolean;
+    day: number;
+    time: string;
+  };
+  monthly_report?: {
+    enabled: boolean;
+    day: number;
+    time: string;
+  };
+};
+
+export async function getNotificationSettings(): Promise<NotificationSettings> {
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("notification_settings")
+    .eq("id", authUser.id)
+    .single();
+
+  if (error) throw new ApiError({ status: 500, code: error.message });
+  return (data.notification_settings as NotificationSettings) ?? {};
+}
+
+export async function updateNotificationSettings(
+  settings: NotificationSettings
+): Promise<{ ok: boolean }> {
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      notification_settings: settings,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", authUser.id);
+
+  if (error) throw new ApiError({ status: 500, code: error.message });
+  return { ok: true };
+}
+
+export async function sendTestNotification(webhookUrl: string): Promise<{ success: boolean }> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) throw new ApiError({ status: 401, code: "UNAUTHORIZED" });
+
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/test-notification`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ webhook_url: webhookUrl }),
+    }
+  );
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new ApiError({ status: response.status, code: result.error || "TEST_FAILED" });
+  }
+  return { success: true };
+}
