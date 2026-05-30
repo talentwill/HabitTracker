@@ -417,6 +417,7 @@ export default function ProfilePage() {
           {notificationSettings.daily_reminder?.enabled && (
             <input
               type="time"
+              step={3600}
               value={notificationSettings.daily_reminder?.time || "08:00"}
               onChange={(e) =>
                 setNotificationSettings({
@@ -478,6 +479,7 @@ export default function ProfilePage() {
               </select>
               <input
                 type="time"
+                step={3600}
                 value={notificationSettings.weekly_report?.time || "09:00"}
                 onChange={(e) =>
                   setNotificationSettings({
@@ -538,6 +540,7 @@ export default function ProfilePage() {
               </select>
               <input
                 type="time"
+                step={3600}
                 value={notificationSettings.monthly_report?.time || "09:00"}
                 onChange={(e) =>
                   setNotificationSettings({
