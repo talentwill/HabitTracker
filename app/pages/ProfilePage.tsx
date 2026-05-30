@@ -415,9 +415,7 @@ export default function ProfilePage() {
             />
           </div>
           {notificationSettings.daily_reminder?.enabled && (
-            <input
-              type="time"
-              step={3600}
+            <select
               value={notificationSettings.daily_reminder?.time || "08:00"}
               onChange={(e) =>
                 setNotificationSettings({
@@ -429,7 +427,13 @@ export default function ProfilePage() {
                 })
               }
               className="input"
-            />
+            >
+              {Array.from({ length: 24 }, (_, i) => (
+                <option key={i} value={`${i.toString().padStart(2, "0")}:00`}>
+                  {i.toString().padStart(2, "0")}:00
+                </option>
+              ))}
+            </select>
           )}
         </div>
 
@@ -477,9 +481,7 @@ export default function ProfilePage() {
                 <option value={6}>周六</option>
                 <option value={0}>周日</option>
               </select>
-              <input
-                type="time"
-                step={3600}
+              <select
                 value={notificationSettings.weekly_report?.time || "09:00"}
                 onChange={(e) =>
                   setNotificationSettings({
@@ -491,7 +493,13 @@ export default function ProfilePage() {
                   })
                 }
                 className="input"
-              />
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={`${i.toString().padStart(2, "0")}:00`}>
+                    {i.toString().padStart(2, "0")}:00
+                  </option>
+                ))}
+              </select>
             </div>
           )}
         </div>
@@ -538,9 +546,7 @@ export default function ProfilePage() {
                   </option>
                 ))}
               </select>
-              <input
-                type="time"
-                step={3600}
+              <select
                 value={notificationSettings.monthly_report?.time || "09:00"}
                 onChange={(e) =>
                   setNotificationSettings({
@@ -552,7 +558,13 @@ export default function ProfilePage() {
                   })
                 }
                 className="input"
-              />
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={`${i.toString().padStart(2, "0")}:00`}>
+                    {i.toString().padStart(2, "0")}:00
+                  </option>
+                ))}
+              </select>
             </div>
           )}
         </div>
