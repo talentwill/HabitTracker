@@ -46,10 +46,11 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 ### Database Setup
 
-Run the schema SQL in your Supabase SQL editor:
+Apply migrations to your Supabase project:
 
 ```bash
-# Copy the contents of supabase-schema.sql into the Supabase SQL editor
+supabase link --project-ref <your-project-ref>
+supabase db push
 ```
 
 ### Development
