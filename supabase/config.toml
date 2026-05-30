@@ -1,0 +1,20 @@
+project_id = "HabitTracker"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+major_version = 17
+
+[db.migrations]
+enabled = true
+
+[realtime]
+enabled = true
+
+[edge_runtime]
+enabled = true
+deno_version = 2

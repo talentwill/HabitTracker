@@ -364,7 +364,7 @@ export async function createHabit(args: {
       note: args.note ?? "",
       interval_days: args.intervalDays ?? 1,
       next_due_date: args.startDate || today,
-      start_date: args.startDate || "",
+      start_date: args.startDate || null,
       tag_id: tagId,
       icon: args.icon ?? null,
     })
@@ -808,7 +808,7 @@ export async function importHabits(
       note: (h.note as string) ?? "",
       interval_days: intervalDays,
       next_due_date: nextDueDate,
-      start_date: startDate ?? "",
+      start_date: startDate ?? null,
       archived: Boolean(h.archived),
       tag_id: tagId,
       icon: h.icon as string | null,
