@@ -97,8 +97,9 @@ export default function ProfilePage() {
       await updateNotificationSettings(notificationSettings);
       setNotificationStatus("done");
       setTimeout(() => setNotificationStatus("idle"), 2000);
-    } catch {
+    } catch (e) {
       setNotificationStatus("error");
+      setErrorMsg(e instanceof ApiError ? e.code : "保存失败，请重试");
     }
   }
 
@@ -375,7 +376,11 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={() => void handleTestNotification()}
-              disabled={!notificationSettings.feishu_webhook || testStatus === "sending"}
+              disabled={
+                !notificationSettings.feishu_webhook ||
+                testStatus === "sending" ||
+                testStatus === "success"
+              }
               className="btn text-[12px] px-3.5 py-1.5"
             >
               {testStatus === "sending" ? "发送中..." : "测试"}
@@ -525,7 +530,7 @@ export default function ProfilePage() {
                 }
                 className="input"
               >
-                {Array.from({ length: 28 }, (_, i) => (
+                {Array.from({ length: 31 }, (_, i) => (
                   <option key={i + 1} value={i + 1}>
                     {i + 1} 日
                   </option>

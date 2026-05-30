@@ -31,24 +31,58 @@ function isValidFeishuWebhook(url: string): boolean {
   return url.startsWith("https://open.feishu.cn/open-apis/bot/v2/hook/");
 }
 
+function getTimeInTimezone(timezone: string) {
+  const now = new Date();
+  const tz = timezone || "Asia/Shanghai";
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(now).map((p) => [p.type, p.value]));
+  const HH = parts.hour.padStart(2, "0");
+  const mm = parts.minute.padStart(2, "0");
+  const dateStr = `${parts.year}-${parts.month}-${parts.day}`;
+  const tempDate = new Date(dateStr + "T00:00:00Z");
+  return {
+    now,
+    currentTime: `${HH}:${mm}`,
+    currentDayOfWeek: tempDate.getUTCDay(),
+    currentDayOfMonth: parseInt(parts.day, 10),
+    today: dateStr,
+  };
+}
+
+function isTimeMatch(currentHHMM: string, targetTime: string, windowMinutes = 2): boolean {
+  const [cH, cM] = currentHHMM.split(":").map(Number);
+  const [tH, tM] = targetTime.substring(0, 5).split(":").map(Number);
+  return Math.abs(cH * 60 + cM - (tH * 60 + tM)) <= windowMinutes;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    const functionSecret = Deno.env.get("SEND_NOTIFICATIONS_SECRET");
+    if (functionSecret && authHeader !== `Bearer ${functionSecret}`) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
-
-    // 获取当前 UTC+8 时间
-    const now = new Date();
-    const utc8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-    const currentTime = `${utc8.getUTCHours().toString().padStart(2, "0")}:${utc8.getUTCMinutes().toString().padStart(2, "0")}`;
-    const currentDayOfWeek = utc8.getUTCDay();
-    const currentDayOfMonth = utc8.getUTCDate();
-    const today = utc8.toISOString().split("T")[0];
 
     // 查询所有有通知配置的用户
     const { data: profiles, error: profilesError } = await supabaseAdmin
@@ -71,6 +105,8 @@ serve(async (req) => {
       userId: string;
       webhookUrl: string;
       types: NotificationType[];
+      today: string;
+      now: Date;
     }> = [];
 
     for (const profile of profiles) {
@@ -78,21 +114,25 @@ serve(async (req) => {
 
       if (!settings.feishu_webhook || !isValidFeishuWebhook(settings.feishu_webhook)) continue;
 
+      const userTimezone = settings.daily_reminder?.timezone || "Asia/Shanghai";
+      const { currentTime, currentDayOfWeek, currentDayOfMonth, today } =
+        getTimeInTimezone(userTimezone);
+
       const types: NotificationType[] = [];
 
       if (
         settings.daily_reminder?.enabled &&
         settings.daily_reminder.time &&
-        currentTime === settings.daily_reminder.time.substring(0, 5)
+        isTimeMatch(currentTime, settings.daily_reminder.time)
       ) {
         types.push("daily");
       }
 
       if (
         settings.weekly_report?.enabled &&
-        currentDayOfWeek === 1 &&
+        currentDayOfWeek === (settings.weekly_report.day ?? 1) &&
         settings.weekly_report.time &&
-        currentTime === settings.weekly_report.time.substring(0, 5)
+        isTimeMatch(currentTime, settings.weekly_report.time)
       ) {
         types.push("weekly");
       }
@@ -101,7 +141,7 @@ serve(async (req) => {
         settings.monthly_report?.enabled &&
         currentDayOfMonth === (settings.monthly_report.day || 1) &&
         settings.monthly_report.time &&
-        currentTime === settings.monthly_report.time.substring(0, 5)
+        isTimeMatch(currentTime, settings.monthly_report.time)
       ) {
         types.push("monthly");
       }
@@ -111,6 +151,8 @@ serve(async (req) => {
           userId: profile.id,
           webhookUrl: settings.feishu_webhook,
           types,
+          today,
+          now: new Date(),
         });
       }
     }
@@ -135,16 +177,18 @@ serve(async (req) => {
       habitsByUser.get(h.user_id)!.push(h);
     }
 
-    // 批量查询所有用户的习惯事件（最近 30 天）
-    const startDate = new Date(utc8.getTime() - 30 * 24 * 60 * 60 * 1000)
+    // 批量查询所有用户的习惯事件（宽松范围，按用户时区在卡片构建时过滤）
+    const now = new Date();
+    const startDate = new Date(now.getTime() - 31 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0];
+    const endDate = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
     const { data: allEvents } = await supabaseAdmin
       .from("habit_events")
       .select("user_id, habit_id, action, action_date")
       .in("user_id", userIds)
       .gte("action_date", startDate)
-      .lte("action_date", today);
+      .lte("action_date", endDate);
 
     const eventsByUser = new Map<string, typeof allEvents>();
     for (const e of allEvents ?? []) {
@@ -160,7 +204,7 @@ serve(async (req) => {
       card: Record<string, unknown>;
     }> = [];
 
-    for (const { userId, webhookUrl, types } of userNotifications) {
+    for (const { userId, webhookUrl, types, today, now } of userNotifications) {
       const habits = habitsByUser.get(userId) ?? [];
       if (habits.length === 0) continue;
 
@@ -220,7 +264,7 @@ serve(async (req) => {
                   elements: [
                     {
                       tag: "plain_text",
-                      content: `发送时间：${utc8.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" })}`,
+                      content: `发送时间：${now.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" })}`,
                     },
                   ],
                 },
@@ -229,7 +273,7 @@ serve(async (req) => {
           };
         } else {
           const daysBack = type === "weekly" ? 7 : 30;
-          const reportStart = new Date(utc8.getTime() - daysBack * 24 * 60 * 60 * 1000)
+          const reportStart = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000)
             .toISOString()
             .split("T")[0];
 
@@ -251,7 +295,7 @@ serve(async (req) => {
           // 计算连续打卡天数
           const doneDates = new Set(doneEvents.map((e) => e.action_date));
           let streak = 0;
-          let checkDate = new Date(utc8.getTime() - 24 * 60 * 60 * 1000);
+          let checkDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
           for (let i = 0; i < daysBack; i++) {
             if (doneDates.has(checkDate.toISOString().split("T")[0])) {
               streak++;
@@ -330,7 +374,12 @@ serve(async (req) => {
             try {
               result = await response.json();
             } catch {
-              result = { code: -1, message: "Invalid JSON response" };
+              result = { code: -1, message: `HTTP ${response.status}: Invalid JSON response` };
+            }
+
+            if (!response.ok) {
+              result.code = result.code ?? -1;
+              result.message = result.message || `HTTP ${response.status}`;
             }
 
             return {
@@ -355,7 +404,7 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ results, processed: profiles.length }), {
+    return new Response(JSON.stringify({ results, processed: tasks.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
